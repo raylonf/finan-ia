@@ -1,0 +1,107 @@
+'use client'
+
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
+import {
+  MessageSquare,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  BarChart3,
+  PieChart,
+  Settings,
+  Bot,
+  Menu,
+  X,
+} from 'lucide-react'
+import { useState } from 'react'
+
+const navItems = [
+  { href: '/chat', label: 'Chat IA', icon: MessageSquare },
+  { href: '/despesas', label: 'Despesas', icon: ArrowDownCircle },
+  { href: '/receitas', label: 'Receitas', icon: ArrowUpCircle },
+  { href: '/analise', label: 'Análise', icon: PieChart },
+  { href: '/graficos', label: 'Gráficos', icon: BarChart3 },
+  { href: '/configuracoes', label: 'Configurações', icon: Settings },
+]
+
+export function Sidebar() {
+  const pathname = usePathname()
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  return (
+    <>
+      {/* Botão mobile */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-100"
+        aria-label="Abrir menu"
+      >
+        <Menu className="w-5 h-5 text-gray-700" />
+      </button>
+
+      {/* Overlay mobile */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/30 z-40"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed md:static inset-y-0 left-0 z-50
+          w-64 bg-white border-r border-gray-100 flex flex-col
+          transition-transform duration-200
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}
+      >
+        {/* Logo */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-gray-800 text-lg leading-tight">Finan IA</h1>
+              <p className="text-xs text-gray-400">Assistente Financeiro</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="md:hidden p-1 text-gray-400 hover:text-gray-600"
+            aria-label="Fechar menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Navegação */}
+        <nav className="flex-1 p-3 space-y-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || (pathname === '/' && item.href === '/chat')
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
+              >
+                <Icon className="w-5 h-5" />
+                {item.label}
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-100">
+          <p className="text-xs text-gray-400 text-center">
+            Finan IA v1.0 • Dados salvos localmente
+          </p>
+        </div>
+      </aside>
+    </>
+  )
+}
