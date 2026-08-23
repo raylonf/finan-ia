@@ -183,7 +183,7 @@ export default function ChatPage() {
       const ctx = buildFinancialContext(transactions)
 
       const savedApiKey = localStorage.getItem('finan_ia_api_key') || ''
-      const savedModel = localStorage.getItem('finan_ia_model') || 'gemini-3.6-flash'
+      const savedModel = localStorage.getItem('finan_ia_model') || 'gemini-2.0-flash'
       const savedProvider = localStorage.getItem('finan_ia_provider') || 'gemini'
 
       const res = await fetch('/api/chat', {
