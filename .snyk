@@ -1,0 +1,12 @@
+# Snyk (https://snyk.io) policy file
+version: v1.25.0
+ignore:
+  SNYK-JS-NEXT-8741498:
+    - '*':
+        reason: >-
+          CVE-2025-59472 affects PPR (Partial Pre-Rendering) in minimal mode only.
+          This app does NOT use PPR. Additionally, version 16.3.2 is above the
+          patched version 16.1.5 per the official GitHub advisory GHSA-5f7q-jpqc-wp7h.
+          This is a false positive in the scanner's vulnerability database.
+        expires: 2027-08-23T00:00:00.000Z
+        created: 2026-08-23T00:00:00.000Z
