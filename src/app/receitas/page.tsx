@@ -1,11 +1,59 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Transaction, CATEGORY_LABELS, CATEGORY_COLORS } from '@/types/finance'
+import { Transaction, CATEGORY_LABELS, CATEGORY_COLORS, Category } from '@/types/finance'
 import { getTransactions, deleteTransaction } from '@/lib/storage'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { TransactionForm } from '@/components/TransactionForm'
-import { Plus, Trash2, Pencil, ArrowUpCircle, Search } from 'lucide-react'
+import {
+  Plus, Trash2, Pencil, ArrowUpCircle, Search,
+  Banknote, Briefcase, TrendingUp, MoreHorizontal,
+} from 'lucide-react'
+
+// Map income categories to icons
+const INCOME_ICONS: Record<string, any> = {
+  salary: Banknote,
+  freelance: Briefcase,
+  investment: TrendingUp,
+  other: MoreHorizontal,
+}
+
+function getIncomeIcon(category: string) {
+  return INCOME_ICONS[category] || MoreHorizontal
+}
+
+// Group transactions by relative date
+function groupByDate(transactions: Transaction[]): { label: string; items: Transaction[] }[] {
+  const groups: Record<string, Transaction[]> = {}
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const weekAgo = new Date(today)
+  weekAgo.setDate(weekAgo.getDate() - 7)
+
+  transactions.forEach((t) => {
+    const date = new Date(t.date)
+    date.setHours(0, 0, 0, 0)
+    let label: string
+
+    if (date.getTime() === today.getTime()) {
+      label = 'Hoje'
+    } else if (date.getTime() === yesterday.getTime()) {
+      label = 'Ontem'
+    } else if (date >= weekAgo) {
+      label = 'Esta semana'
+    } else {
+      label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+      label = label.charAt(0).toUpperCase() + label.slice(1)
+    }
+
+    if (!groups[label]) groups[label] = []
+    groups[label].push(t)
+  })
+
+  return Object.entries(groups).map(([label, items]) => ({ label, items }))
+}
 
 export default function ReceitasPage() {
   const [incomes, setIncomes] = useState<Transaction[]>([])
@@ -44,6 +92,7 @@ export default function ReceitasPage() {
     : incomes
 
   const total = filtered.reduce((sum, t) => sum + t.amount, 0)
+  const grouped = groupByDate(filtered)
 
   return (
     <div className="h-full overflow-y-auto custom-scrollbar">
@@ -52,7 +101,9 @@ export default function ReceitasPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <ArrowUpCircle className="w-6 h-6 text-green-500" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-success-400 to-success-600 flex items-center justify-center shadow-sm">
+                <ArrowUpCircle className="w-4 h-4 text-white" />
+              </div>
               Receitas
             </h2>
             <p className="text-sm text-gray-500 mt-1">Gerencie suas fontes de renda</p>
@@ -65,19 +116,27 @@ export default function ReceitasPage() {
 
         {/* Form */}
         {showForm && (
-          <TransactionForm
-            type="income"
-            editingTransaction={editing}
-            onSave={handleSaved}
-            onCancel={() => { setShowForm(false); setEditing(null) }}
-          />
+          <div className="animate-fade-in">
+            <TransactionForm
+              type="income"
+              editingTransaction={editing}
+              onSave={handleSaved}
+              onCancel={() => { setShowForm(false); setEditing(null) }}
+            />
+          </div>
         )}
 
         {/* Total Card */}
-        <div className="card p-4 bg-green-50 border-green-100">
-          <p className="text-sm text-green-600 font-medium">Total de receitas</p>
-          <p className="text-2xl font-bold text-green-700">{formatCurrency(total)}</p>
-          <p className="text-xs text-green-500 mt-1">{filtered.length} transações</p>
+        <div className="card-static p-5 bg-gradient-to-r from-success-50 to-emerald-50 border-success-100 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-success-100/50 rounded-full -mr-8 -mt-8" />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="w-4 h-4 text-success-500" />
+              <p className="text-sm text-success-600 font-medium">Total de receitas</p>
+            </div>
+            <p className="text-3xl font-bold text-success-700 tracking-tight">{formatCurrency(total)}</p>
+            <p className="text-xs text-success-500 mt-1">{filtered.length} {filtered.length === 1 ? 'transação' : 'transações'}</p>
+          </div>
         </div>
 
         {/* Search */}
@@ -95,41 +154,78 @@ export default function ReceitasPage() {
         )}
 
         {/* List */}
-        <div className="space-y-2">
-          {filtered.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              <ArrowUpCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-              <p className="font-medium">Nenhuma receita registrada</p>
-              <p className="text-sm mt-1">Adicione pelo botão acima ou use o chat</p>
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 animate-fade-in">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-success-50 to-emerald-100 flex items-center justify-center mx-auto mb-4">
+              <ArrowUpCircle className="w-9 h-9 text-success-400" />
             </div>
-          )}
+            <p className="font-semibold text-gray-700 text-lg">Nenhuma receita registrada</p>
+            <p className="text-sm text-gray-500 mt-2 max-w-xs mx-auto">
+              Adicione pelo botão acima ou diga no chat: &ldquo;Recebi R$ 5.000 de salário&rdquo;
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {grouped.map((group, gi) => (
+              <div key={group.label} className="animate-fade-in" style={{ animationDelay: `${gi * 0.05}s` }}>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-1 mb-2">
+                  {group.label}
+                </p>
+                <div className="space-y-2">
+                  {group.items.map((t) => {
+                    const Icon = getIncomeIcon(t.category)
+                    const color = CATEGORY_COLORS[t.category]
+                    return (
+                      <div
+                        key={t.id}
+                        className="card p-4 flex items-center gap-3 group"
+                      >
+                        {/* Category icon */}
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
+                          style={{ backgroundColor: `${color}15` }}
+                        >
+                          <Icon className="w-5 h-5" style={{ color }} />
+                        </div>
 
-          {filtered.map((t) => (
-            <div key={t.id} className="card p-4 flex items-center justify-between group hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: CATEGORY_COLORS[t.category] }}
-                />
-                <div>
-                  <p className="font-medium text-gray-800 text-sm">{t.description}</p>
-                  <p className="text-xs text-gray-400">{CATEGORY_LABELS[t.category]} • {formatDate(t.date)}</p>
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-800 text-sm truncate">{t.description}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {CATEGORY_LABELS[t.category]} · {formatDate(t.date)}
+                          </p>
+                        </div>
+
+                        {/* Amount + Actions */}
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-success-600 text-sm tabular-nums">
+                            +{formatCurrency(t.amount)}
+                          </span>
+                          <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-all translate-x-1 group-hover:translate-x-0">
+                            <button
+                              onClick={() => handleEdit(t)}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+                              title="Editar"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(t.id)}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-danger-600 hover:bg-danger-50 transition-colors"
+                              title="Excluir"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="font-semibold text-green-600 text-sm">+{formatCurrency(t.amount)}</span>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handleEdit(t)} className="p-1.5 text-gray-400 hover:text-brand-600 rounded" title="Editar">
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => handleDelete(t.id)} className="p-1.5 text-gray-400 hover:text-red-500 rounded" title="Excluir">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

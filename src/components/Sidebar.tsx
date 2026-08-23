@@ -15,13 +15,39 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
-const navItems = [
-  { href: '/chat', label: 'Chat IA', icon: MessageSquare },
-  { href: '/despesas', label: 'Despesas', icon: ArrowDownCircle },
-  { href: '/receitas', label: 'Receitas', icon: ArrowUpCircle },
-  { href: '/analise', label: 'Análise', icon: PieChart },
-  { href: '/graficos', label: 'Gráficos', icon: BarChart3 },
-  { href: '/configuracoes', label: 'Configurações', icon: Settings },
+interface NavItem {
+  href: string
+  label: string
+  icon: any
+}
+
+interface NavSection {
+  title: string
+  items: NavItem[]
+}
+
+const navSections: NavSection[] = [
+  {
+    title: 'Inteligência',
+    items: [
+      { href: '/chat', label: 'Chat IA', icon: MessageSquare },
+    ],
+  },
+  {
+    title: 'Financeiro',
+    items: [
+      { href: '/despesas', label: 'Despesas', icon: ArrowDownCircle },
+      { href: '/receitas', label: 'Receitas', icon: ArrowUpCircle },
+      { href: '/analise', label: 'Análise', icon: PieChart },
+      { href: '/graficos', label: 'Gráficos', icon: BarChart3 },
+    ],
+  },
+  {
+    title: 'Sistema',
+    items: [
+      { href: '/configuracoes', label: 'Configurações', icon: Settings },
+    ],
+  },
 ]
 
 export function Sidebar() {
@@ -42,7 +68,7 @@ export function Sidebar() {
       {/* Overlay mobile */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/30 z-40"
+          className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -59,12 +85,12 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-500/20">
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div>
               <h1 className="font-bold text-gray-800 text-lg leading-tight">Finan IA</h1>
-              <p className="text-xs text-gray-400">Assistente Financeiro</p>
+              <p className="text-[10px] text-gray-400">Assistente Financeiro</p>
             </div>
           </div>
           <button
@@ -77,27 +103,44 @@ export function Sidebar() {
         </div>
 
         {/* Navegação */}
-        <nav className="flex-1 p-3 space-y-1">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || (pathname === '/' && item.href === '/chat')
-            const Icon = item.icon
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className={`nav-item ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
-              >
-                <Icon className="w-5 h-5" />
-                {item.label}
-              </Link>
-            )
-          })}
+        <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
+          {navSections.map((section) => (
+            <div key={section.title}>
+              <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                {section.title}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href || (pathname === '/' && item.href === '/chat')
+                  const Icon = item.icon
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`nav-item group ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                        isActive
+                          ? 'bg-gradient-to-br from-brand-500 to-brand-700 shadow-sm shadow-brand-500/20'
+                          : 'bg-gray-100 group-hover:bg-gray-200'
+                      }`}>
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
+                      </div>
+                      <span className={`text-sm font-medium ${isActive ? 'text-brand-700' : 'text-gray-600 group-hover:text-gray-800'}`}>
+                        {item.label}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-100">
-          <p className="text-xs text-gray-400 text-center">
+          <p className="text-[10px] text-gray-400 text-center">
             Finan IA v1.0 • Dados salvos localmente
           </p>
         </div>

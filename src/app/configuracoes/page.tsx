@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Settings, Key, Cpu, CheckCircle, Eye, EyeOff, AlertTriangle, Zap } from 'lucide-react'
+import { Settings, Key, Cpu, CheckCircle, Eye, EyeOff, AlertTriangle, Zap, Download, Upload, Database } from 'lucide-react'
+import { exportAllData, importData } from '@/lib/storage'
 
 type Provider = 'gemini' | 'openai'
 
@@ -12,9 +13,9 @@ const PROVIDERS = [
 
 const MODELS: Record<Provider, { id: string; name: string; description: string }[]> = {
   gemini: [
-    { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash', description: 'Mais recente, rápido e gratuito' },
-    { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash', description: 'Rápido, ótimo para uso diário' },
-    { id: 'gemini-3.7-flash', name: 'Gemini 3.7 Flash', description: 'Mais avançado, coding e agentes' },
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', description: 'Mais recente, rápido e gratuito' },
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', description: 'Rápido, ótimo para uso diário' },
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', description: 'Mais avançado, respostas detalhadas' },
   ],
   openai: [
     { id: 'gpt-4o-mini', name: 'GPT-4o Mini', description: 'Rápido e econômico' },
@@ -40,7 +41,7 @@ export default function ConfiguracoesPage() {
   useEffect(() => {
     const savedProvider = (localStorage.getItem(STORAGE_KEY_PROVIDER) || 'gemini') as Provider
     const savedKey = localStorage.getItem(STORAGE_KEY_API) || ''
-    const savedModel = localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-3.6-flash'
+    const savedModel = localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-2.0-flash'
     setProvider(savedProvider)
     setApiKey(savedKey)
     setModel(savedModel)
@@ -281,7 +282,97 @@ export default function ConfiguracoesPage() {
             durante o processamento das mensagens e nunca é armazenada em servidor externo.
           </p>
         </div>
+
+        {/* Backup de Dados */}
+        <BackupSection />
       </div>
+    </div>
+  )
+}
+
+function BackupSection() {
+  const [importResult, setImportResult] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+
+  function handleExport() {
+    const data = exportAllData()
+    const blob = new Blob([data], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `finan-ia-backup-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setImportResult(null)
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const content = event.target?.result as string
+      const result = importData(content)
+
+      if (result.success) {
+        setImportResult({ type: 'success', msg: 'Dados importados com sucesso! Recarregue a página para ver as alterações.' })
+      } else {
+        setImportResult({ type: 'error', msg: result.error || 'Erro ao importar' })
+      }
+    }
+    reader.onerror = () => {
+      setImportResult({ type: 'error', msg: 'Erro ao ler o arquivo' })
+    }
+    reader.readAsText(file)
+
+    // Reset input para permitir reimportar o mesmo arquivo
+    e.target.value = ''
+  }
+
+  return (
+    <div className="card p-6 space-y-4">
+      <div className="flex items-center gap-2">
+        <Database className="w-5 h-5 text-brand-600" />
+        <h3 className="font-semibold text-gray-800">Backup de Dados</h3>
+      </div>
+
+      <p className="text-sm text-gray-500">
+        Seus dados ficam apenas neste navegador. Faça backup regularmente para não perder nada.
+      </p>
+
+      <div className="flex gap-3">
+        <button onClick={handleExport} className="btn-secondary flex items-center gap-2 text-sm">
+          <Download className="w-4 h-4" />
+          Exportar dados
+        </button>
+
+        <label className="btn-secondary flex items-center gap-2 text-sm cursor-pointer">
+          <Upload className="w-4 h-4" />
+          Importar backup
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleImport}
+            className="hidden"
+          />
+        </label>
+      </div>
+
+      {importResult && (
+        <div className={`flex items-center gap-2 text-sm p-3 rounded-lg ${
+          importResult.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+        }`}>
+          {importResult.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+          {importResult.msg}
+        </div>
+      )}
+
+      <p className="text-xs text-gray-400">
+        O arquivo exportado contém todas as transações e mensagens do chat em formato JSON.
+      </p>
     </div>
   )
 }

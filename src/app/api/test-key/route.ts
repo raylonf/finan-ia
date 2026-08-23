@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 async function testGemini(apiKey: string, model: string) {
   try {
     const genAI = new GoogleGenerativeAI(apiKey)
-    const genModel = genAI.getGenerativeModel({ model: model || 'gemini-3.6-flash' })
+    const genModel = genAI.getGenerativeModel({ model: model || 'gemini-2.0-flash' })
 
     const result = await genModel.generateContent('Responda apenas: ok')
     const text = result.response.text()

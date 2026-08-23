@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
+/** Timeout para chamadas a APIs externas (30 segundos) */
+const AI_TIMEOUT_MS = 30_000
+
+/** Limites de validação */
+const MAX_MESSAGES = 50
+const MAX_MESSAGE_LENGTH = 5000
+const MAX_CONTEXT_LENGTH = 10000
+const VALID_PROVIDERS = ['gemini', 'openai'] as const
+const VALID_MODELS = [
+  'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro',
+  'gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo',
+] as const
+
 const SYSTEM_PROMPT = `Você é o Finan IA, um assistente financeiro pessoal inteligente e amigável. Seu papel é:
 
 1. Analisar as finanças do usuário com base nos dados fornecidos
@@ -26,12 +39,92 @@ Categorias válidas para receitas: salary, freelance, investment, other
 
 Inclua esse bloco APENAS quando detectar claramente uma transação. Continue a conversa normalmente.`
 
+interface ChatMessage {
+  role: string
+  content: string
+}
+
+/**
+ * Valida e sanitiza os inputs da request.
+ * Retorna null se válido, ou um NextResponse de erro se inválido.
+ */
+function validateRequest(body: unknown): {
+  messages: ChatMessage[]
+  financialContext: string
+  apiKey: string
+  model: string
+  provider: 'gemini' | 'openai'
+} | NextResponse {
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
+  }
+
+  const { messages, financialContext, apiKey, model, provider } = body as Record<string, unknown>
+
+  // Validar messages
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return NextResponse.json({ error: 'Messages é obrigatório' }, { status: 400 })
+  }
+
+  if (messages.length > MAX_MESSAGES) {
+    return NextResponse.json({ error: `Máximo de ${MAX_MESSAGES} mensagens por request` }, { status: 400 })
+  }
+
+  const validatedMessages: ChatMessage[] = messages
+    .filter((m): m is { role: string; content: string } =>
+      m && typeof m === 'object' &&
+      typeof (m as any).role === 'string' &&
+      typeof (m as any).content === 'string'
+    )
+    .map((m) => ({
+      role: ['user', 'assistant'].includes(m.role) ? m.role : 'user',
+      content: m.content.slice(0, MAX_MESSAGE_LENGTH),
+    }))
+
+  if (validatedMessages.length === 0) {
+    return NextResponse.json({ error: 'Nenhuma mensagem válida' }, { status: 400 })
+  }
+
+  // Validar provider
+  const validProvider = (typeof provider === 'string' && VALID_PROVIDERS.includes(provider as any))
+    ? provider as 'gemini' | 'openai'
+    : 'gemini'
+
+  // Validar model (aceita valores da lista ou usa default)
+  const validModel = (typeof model === 'string' && model.length <= 50)
+    ? model
+    : validProvider === 'gemini' ? 'gemini-2.0-flash' : 'gpt-4o-mini'
+
+  // Sanitizar context
+  const validContext = typeof financialContext === 'string'
+    ? financialContext.slice(0, MAX_CONTEXT_LENGTH)
+    : ''
+
+  // API key
+  const validApiKey = typeof apiKey === 'string' ? apiKey.trim().slice(0, 200) : ''
+  const resolvedKey = validApiKey || process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY || ''
+
+  return {
+    messages: validatedMessages,
+    financialContext: validContext,
+    apiKey: resolvedKey,
+    model: validModel,
+    provider: validProvider,
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { messages, financialContext, apiKey: clientKey, model: clientModel, provider } = await request.json()
+    const body = await request.json()
+    const validation = validateRequest(body)
 
-    const apiKey = clientKey || process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY
-    const selectedProvider = provider || 'gemini'
+    // Se retornou NextResponse, é um erro de validação
+    if (validation instanceof NextResponse) {
+      return validation
+    }
+
+    const { messages, financialContext, apiKey, model, provider } = validation
+    const attachments = Array.isArray(body.attachments) ? body.attachments : []
 
     if (!apiKey || apiKey === 'sua-chave-aqui' || apiKey === 'sua-chave-gemini-aqui') {
       const lastMsg = messages[messages.length - 1]?.content || ''
@@ -44,15 +137,23 @@ export async function POST(request: NextRequest) {
 
     let responseText: string
 
-    if (selectedProvider === 'gemini') {
-      responseText = await callGemini(apiKey, clientModel || 'gemini-3.6-flash', systemContent, messages)
+    if (provider === 'gemini') {
+      responseText = await callGemini(apiKey, model, systemContent, messages, attachments)
     } else {
-      responseText = await callOpenAI(apiKey, clientModel || 'gpt-4o-mini', systemContent, messages)
+      responseText = await callOpenAI(apiKey, model, systemContent, messages)
     }
 
     return NextResponse.json({ message: responseText })
   } catch (error: unknown) {
-    console.error('Erro na API:', error)
+    console.error('Erro na API chat:', error instanceof Error ? error.message : error)
+
+    if (error instanceof Error && error.name === 'AbortError') {
+      return NextResponse.json(
+        { error: 'Tempo limite excedido. A IA demorou para responder.' },
+        { status: 504 },
+      )
+    }
+
     const msg = error instanceof Error ? error.message : 'Erro desconhecido'
     return NextResponse.json({ error: `Erro: ${msg}` }, { status: 500 })
   }
@@ -63,7 +164,8 @@ async function callGemini(
   apiKey: string,
   model: string,
   systemPrompt: string,
-  messages: { role: string; content: string }[]
+  messages: ChatMessage[],
+  attachments: { name: string; mimeType: string; base64: string }[]
 ): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey)
   const genModel = genAI.getGenerativeModel({
@@ -78,43 +180,82 @@ async function callGemini(
 
   const lastMessage = messages[messages.length - 1]?.content || ''
 
+  // Montar parts: texto + arquivos inline
+  const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = []
+
+  if (lastMessage) {
+    parts.push({ text: lastMessage })
+  }
+
+  if (attachments && attachments.length > 0) {
+    for (const file of attachments) {
+      parts.push({
+        inlineData: {
+          mimeType: file.mimeType,
+          data: file.base64,
+        },
+      })
+    }
+    if (!lastMessage) {
+      parts.unshift({ text: `Analise este(s) arquivo(s) no contexto financeiro.` })
+    }
+  }
+
   const chat = genModel.startChat({ history })
-  const result = await chat.sendMessage(lastMessage)
+
+  const result = await Promise.race([
+    chat.sendMessage(parts as never),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => {
+        const err = new Error('Tempo limite excedido ao chamar Gemini')
+        err.name = 'AbortError'
+        reject(err)
+      }, AI_TIMEOUT_MS)
+    ),
+  ])
 
   return result.response.text() || 'Desculpe, não consegui processar.'
 }
 
-// --- OpenAI (via fetch, sem dependência do pacote) ---
+// --- OpenAI (via fetch com timeout) ---
 async function callOpenAI(
   apiKey: string,
   model: string,
   systemPrompt: string,
-  messages: { role: string; content: string }[]
+  messages: ChatMessage[]
 ): Promise<string> {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages.map((m) => ({ role: m.role, content: m.content })),
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
-    }),
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS)
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error(err?.error?.message || `OpenAI retornou ${res.status}`)
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...messages.map((m) => ({ role: m.role, content: m.content })),
+        ],
+        temperature: 0.7,
+        max_tokens: 1000,
+      }),
+      signal: controller.signal,
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err?.error?.message || `OpenAI retornou ${res.status}`)
+    }
+
+    const data = await res.json()
+    return data.choices?.[0]?.message?.content || 'Desculpe, não consegui processar.'
+  } finally {
+    clearTimeout(timeoutId)
   }
-
-  const data = await res.json()
-  return data.choices?.[0]?.message?.content || 'Desculpe, não consegui processar.'
 }
 
 // --- Modo Demo ---
