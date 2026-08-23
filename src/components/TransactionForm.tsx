@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { Transaction, TransactionType, Category, CATEGORY_LABELS, INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '@/types/finance'
-import { saveTransaction, updateTransaction } from '@/lib/storage'
+import { saveTransaction, updateTransaction } from '@/lib/data'
 import { X } from 'lucide-react'
 
 interface TransactionFormProps {
@@ -21,7 +21,7 @@ export function TransactionForm({ type, editingTransaction, onSave, onCancel }: 
   const [category, setCategory] = useState<Category>(editingTransaction?.category || categories[0])
   const [date, setDate] = useState(editingTransaction?.date?.split('T')[0] || new Date().toISOString().split('T')[0])
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!description.trim() || !amount || !date) return
 
@@ -29,7 +29,7 @@ export function TransactionForm({ type, editingTransaction, onSave, onCancel }: 
     if (isNaN(parsedAmount) || parsedAmount <= 0) return
 
     if (editingTransaction) {
-      updateTransaction({
+      await updateTransaction({
         ...editingTransaction,
         description: description.trim(),
         amount: parsedAmount,
@@ -46,7 +46,7 @@ export function TransactionForm({ type, editingTransaction, onSave, onCancel }: 
         date: new Date(date).toISOString(),
         createdAt: new Date().toISOString(),
       }
-      saveTransaction(t)
+      await saveTransaction(t)
     }
 
     onSave()

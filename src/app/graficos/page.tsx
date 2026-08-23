@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Transaction, CATEGORY_LABELS, CATEGORY_COLORS, Category } from '@/types/finance'
-import { getTransactions } from '@/lib/storage'
+import { getTransactions } from '@/lib/data'
 import { formatCurrency, getByCategory, getMonthlyData, getTotalExpenses } from '@/lib/utils'
 import { BarChart3 } from 'lucide-react'
 
@@ -10,7 +10,7 @@ export default function GraficosPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
 
   useEffect(() => {
-    setTransactions(getTransactions())
+    getTransactions().then(setTransactions)
   }, [])
 
   const monthlyData = getMonthlyData(transactions)

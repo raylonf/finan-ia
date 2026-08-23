@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Transaction, CATEGORY_LABELS, CATEGORY_COLORS, Category } from '@/types/finance'
-import { getTransactions } from '@/lib/storage'
+import { getTransactions } from '@/lib/data'
 import { formatCurrency, getTotalIncome, getTotalExpenses, getBalance, getByCategory } from '@/lib/utils'
 import {
   PieChart,
@@ -19,7 +19,7 @@ export default function AnalisePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
 
   useEffect(() => {
-    setTransactions(getTransactions())
+    getTransactions().then(setTransactions)
   }, [])
 
   const income = getTotalIncome(transactions)

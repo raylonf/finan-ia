@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Transaction, CATEGORY_LABELS, CATEGORY_COLORS, Category } from '@/types/finance'
-import { getTransactions, deleteTransaction } from '@/lib/storage'
+import { getTransactions, deleteTransaction } from '@/lib/data'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { TransactionForm } from '@/components/TransactionForm'
 import {
@@ -61,15 +61,15 @@ export default function ReceitasPage() {
   const [editing, setEditing] = useState<Transaction | null>(null)
   const [search, setSearch] = useState('')
 
-  function loadData() {
-    const all = getTransactions().filter((t) => t.type === 'income')
+  async function loadData() {
+    const all = (await getTransactions()).filter((t) => t.type === 'income')
     setIncomes(all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()))
   }
 
   useEffect(() => { loadData() }, [])
 
-  function handleDelete(id: string) {
-    deleteTransaction(id)
+  async function handleDelete(id: string) {
+    await deleteTransaction(id)
     loadData()
   }
 

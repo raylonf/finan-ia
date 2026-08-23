@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { ChatMessage, Transaction } from '@/types/finance'
-import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction } from '@/lib/storage'
+import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction, getUserSettings } from '@/lib/data'
 import { buildFinancialContext } from '@/lib/utils'
 import { Send, Trash2, Bot, User, MessageSquare, Paperclip, X, FileText, Image, Film, Mic, Square } from 'lucide-react'
 
@@ -30,7 +30,7 @@ export default function ChatPage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    setMessages(getMessages())
+    getMessages().then(setMessages)
   }, [])
 
   useEffect(() => {
@@ -179,12 +179,10 @@ export default function ChatPage() {
     setLoading(true)
 
     try {
-      const transactions = getTransactions()
+      const transactions = await getTransactions()
       const ctx = buildFinancialContext(transactions)
 
-      const savedApiKey = localStorage.getItem('finan_ia_api_key') || ''
-      const savedModel = localStorage.getItem('finan_ia_model') || 'gemini-3.6-flash'
-      const savedProvider = localStorage.getItem('finan_ia_provider') || 'gemini'
+      const settings = await getUserSettings()
 
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -192,9 +190,9 @@ export default function ChatPage() {
         body: JSON.stringify({
           messages: [...messages, userMsg].map((m) => ({ role: m.role, content: m.content })),
           financialContext: ctx,
-          apiKey: savedApiKey,
-          model: savedModel,
-          provider: savedProvider,
+          apiKey: settings.api_key,
+          model: settings.ai_model,
+          provider: settings.ai_provider,
           attachments: currentAttachments.map((a) => ({
             name: a.name,
             mimeType: a.type,

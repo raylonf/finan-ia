@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { Settings, Key, Cpu, CheckCircle, Eye, EyeOff, AlertTriangle, Zap, Download, Upload, Database } from 'lucide-react'
 import { exportAllData, importData } from '@/lib/storage'
 
+import { getUserSettings, saveUserSettings } from '@/lib/data'
+
 type Provider = 'gemini' | 'openai'
 
 const PROVIDERS = [
@@ -39,12 +41,11 @@ export default function ConfiguracoesPage() {
   const [testError, setTestError] = useState('')
 
   useEffect(() => {
-    const savedProvider = (localStorage.getItem(STORAGE_KEY_PROVIDER) || 'gemini') as Provider
-    const savedKey = localStorage.getItem(STORAGE_KEY_API) || ''
-    const savedModel = localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-3.6-flash'
-    setProvider(savedProvider)
-    setApiKey(savedKey)
-    setModel(savedModel)
+    getUserSettings().then((settings) => {
+      setProvider((settings.ai_provider || 'gemini') as Provider)
+      setApiKey(settings.api_key || '')
+      setModel(settings.ai_model || 'gemini-3.6-flash')
+    })
   }, [])
 
   function handleProviderChange(p: Provider) {
@@ -54,10 +55,12 @@ export default function ConfiguracoesPage() {
     setTestError('')
   }
 
-  function handleSave() {
-    localStorage.setItem(STORAGE_KEY_API, apiKey.trim())
-    localStorage.setItem(STORAGE_KEY_MODEL, model)
-    localStorage.setItem(STORAGE_KEY_PROVIDER, provider)
+  async function handleSave() {
+    await saveUserSettings({
+      api_key: apiKey.trim(),
+      ai_model: model,
+      ai_provider: provider,
+    })
     setSaved(true)
     setTestResult(null)
     setTimeout(() => setSaved(false), 3000)
@@ -97,7 +100,7 @@ export default function ConfiguracoesPage() {
 
   function handleClear() {
     setApiKey('')
-    localStorage.removeItem(STORAGE_KEY_API)
+    saveUserSettings({ api_key: '' })
     setTestResult(null)
     setTestError('')
   }
