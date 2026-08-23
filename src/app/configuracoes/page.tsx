@@ -13,9 +13,9 @@ const PROVIDERS = [
 
 const MODELS: Record<Provider, { id: string; name: string; description: string }[]> = {
   gemini: [
-    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', description: 'Mais recente, rápido e gratuito' },
-    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', description: 'Rápido, ótimo para uso diário' },
-    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', description: 'Mais avançado, respostas detalhadas' },
+    { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash', description: 'Mais recente, rápido e gratuito' },
+    { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash', description: 'Rápido, ótimo para uso diário' },
+    { id: 'gemini-3.7-flash', name: 'Gemini 3.7 Flash', description: 'Mais avançado, coding e agentes' },
   ],
   openai: [
     { id: 'gpt-4o-mini', name: 'GPT-4o Mini', description: 'Rápido e econômico' },
@@ -31,7 +31,7 @@ const STORAGE_KEY_PROVIDER = 'finan_ia_provider'
 export default function ConfiguracoesPage() {
   const [provider, setProvider] = useState<Provider>('gemini')
   const [apiKey, setApiKey] = useState('')
-  const [model, setModel] = useState('gemini-2.0-flash')
+  const [model, setModel] = useState('gemini-3.6-flash')
   const [showKey, setShowKey] = useState(false)
   const [saved, setSaved] = useState(false)
   const [testing, setTesting] = useState(false)
@@ -41,7 +41,7 @@ export default function ConfiguracoesPage() {
   useEffect(() => {
     const savedProvider = (localStorage.getItem(STORAGE_KEY_PROVIDER) || 'gemini') as Provider
     const savedKey = localStorage.getItem(STORAGE_KEY_API) || ''
-    const savedModel = localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-2.0-flash'
+    const savedModel = localStorage.getItem(STORAGE_KEY_MODEL) || 'gemini-3.6-flash'
     setProvider(savedProvider)
     setApiKey(savedKey)
     setModel(savedModel)

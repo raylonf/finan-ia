@@ -10,7 +10,7 @@ const MAX_MESSAGE_LENGTH = 5000
 const MAX_CONTEXT_LENGTH = 10000
 const VALID_PROVIDERS = ['gemini', 'openai'] as const
 const VALID_MODELS = [
-  'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro',
+  'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.7-flash',
   'gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo',
 ] as const
 
@@ -93,7 +93,7 @@ function validateRequest(body: unknown): {
   // Validar model (aceita valores da lista ou usa default)
   const validModel = (typeof model === 'string' && model.length <= 50)
     ? model
-    : validProvider === 'gemini' ? 'gemini-2.0-flash' : 'gpt-4o-mini'
+    : validProvider === 'gemini' ? 'gemini-3.6-flash' : 'gpt-4o-mini'
 
   // Sanitizar context
   const validContext = typeof financialContext === 'string'
