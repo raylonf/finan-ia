@@ -128,7 +128,9 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey || apiKey === 'sua-chave-aqui' || apiKey === 'sua-chave-gemini-aqui') {
       const lastMsg = messages[messages.length - 1]?.content || ''
-      return NextResponse.json({ message: generateDemo(lastMsg, financialContext) })
+      // Passa últimas 5 mensagens para contexto no modo demo
+      const recentHistory = messages.slice(-5).map(m => `${m.role === 'user' ? 'Usuário' : 'Assistente'}: ${m.content}`).join('\n')
+      return NextResponse.json({ message: generateDemo(lastMsg, financialContext, recentHistory) })
     }
 
     const systemContent = financialContext
@@ -259,8 +261,20 @@ async function callOpenAI(
 }
 
 // --- Modo Demo ---
-function generateDemo(msg: string, ctx: string): string {
+function generateDemo(msg: string, ctx: string, history: string): string {
   const lower = msg.toLowerCase()
+
+  // Se a mensagem parece ser resposta a uma pergunta anterior do assistente
+  // (ex: "30 reais" depois de "Pode me dizer o valor?")
+  if (history.includes('valor exato') || history.includes('Pode me dizer o valor')) {
+    const amount = extractAmount(msg)
+    if (amount) {
+      // Tenta detectar a categoria da mensagem anterior no histórico
+      const cat = detectExpenseCategory(history.toLowerCase())
+      const prevDesc = history.match(/Usuário: (.+)/)?.[1] || msg
+      return `Registrei essa despesa para você! 📝\n\n[TRANSACTION]\n{"type":"expense","category":"${cat}","description":"${prevDesc.slice(0, 60)}","amount":${amount}}\n[/TRANSACTION]\n\n💡 Dica: Acompanhe seus gastos regularmente.`
+    }
+  }
 
   if (lower.includes('gastei') || lower.includes('paguei') || lower.includes('comprei')) {
     const amount = extractAmount(msg)
@@ -299,7 +313,14 @@ function generateDemo(msg: string, ctx: string): string {
 }
 
 function extractAmount(text: string): number | null {
-  const patterns = [/R\$\s*([\d.,]+)/i, /(\d+[.,]\d{2})/, /(\d+)\s*(reais|real)/i, /(\d+)\s*mil/i]
+  const patterns = [
+    /R\$\s*([\d.,]+)/i,
+    /(\d+[.,]\d{2})/,
+    /(\d+)\s*(reais|real)/i,
+    /(\d+)\s*mil/i,
+    /(\d+)\s*(conto|pila)/i,
+    /\b(\d+)\b/,  // qualquer número isolado como fallback
+  ]
   for (const p of patterns) {
     const m = text.match(p)
     if (m) {
