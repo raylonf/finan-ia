@@ -13,7 +13,9 @@ import {
   Menu,
   X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 interface NavItem {
   href: string
@@ -52,7 +54,27 @@ const navSections: NavSection[] = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [userName, setUserName] = useState('')
+  const [userEmail, setUserEmail] = useState('')
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserName(user.user_metadata?.name || '')
+        setUserEmail(user.email || '')
+      }
+    })
+  }, [])
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
 
   return (
     <>
@@ -138,11 +160,25 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* Footer */}
+        {/* Footer - Usuário */}
         <div className="p-4 border-t border-gray-100">
-          <p className="text-[10px] text-gray-400 text-center">
-            Finan IA v1.0 • Dados salvos localmente
-          </p>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
+              <span className="text-xs font-bold text-brand-700">
+                {userName ? userName.charAt(0).toUpperCase() : '?'}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-gray-700 truncate">{userName || 'Usuário'}</p>
+              <p className="text-[10px] text-gray-400 truncate">{userEmail}</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="mt-3 w-full text-xs text-gray-400 hover:text-red-500 transition-colors text-left"
+          >
+            Sair da conta
+          </button>
         </div>
       </aside>
     </>
