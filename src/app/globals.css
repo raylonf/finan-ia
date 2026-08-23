@@ -6,9 +6,16 @@
   body {
     @apply bg-gradient-to-br from-gray-50 to-indigo-50/30 text-gray-900 antialiased min-h-screen;
   }
+  /* Safe area para iPhones com notch */
+  html {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
 }
 
 @layer components {
+  .safe-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
   .chat-bubble-user {
     @apply bg-gradient-to-br from-brand-600 to-brand-700 text-white rounded-2xl rounded-br-sm px-4 py-3 shadow-sm shadow-brand-500/10;
   }

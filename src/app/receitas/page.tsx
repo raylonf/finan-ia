@@ -96,9 +96,9 @@ export default function ReceitasPage() {
 
   return (
     <div className="h-full overflow-y-auto custom-scrollbar">
-      <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between ml-10 md:ml-0">
           <div>
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-success-400 to-success-600 flex items-center justify-center shadow-sm">

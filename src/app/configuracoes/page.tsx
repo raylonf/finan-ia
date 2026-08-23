@@ -109,9 +109,9 @@ export default function ConfiguracoesPage() {
 
   return (
     <div className="h-full overflow-y-auto custom-scrollbar">
-      <div className="max-w-2xl mx-auto p-6 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 space-y-6">
         {/* Header */}
-        <div>
+        <div className="ml-10 md:ml-0">
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <Settings className="w-6 h-6 text-brand-600" />
             Configurações
