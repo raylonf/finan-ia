@@ -158,13 +158,49 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json(
-        { error: 'Tempo limite excedido. A IA demorou para responder.' },
+        { error: 'A IA demorou para responder. Tente novamente.' },
         { status: 504 },
       )
     }
 
-    const msg = error instanceof Error ? error.message : 'Erro desconhecido'
-    return NextResponse.json({ error: `Erro: ${msg}` }, { status: 500 })
+    const msg = error instanceof Error ? error.message : ''
+
+    // Rate limit do Gemini
+    if (msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests')) {
+      return NextResponse.json(
+        { error: 'Você atingiu o limite de requisições gratuitas do Gemini. Aguarde alguns segundos e tente novamente.' },
+        { status: 429 },
+      )
+    }
+
+    // Chave inválida
+    if (msg.includes('401') || msg.includes('API_KEY_INVALID') || msg.includes('Unauthorized')) {
+      return NextResponse.json(
+        { error: 'Chave de API inválida. Verifique nas Configurações.' },
+        { status: 401 },
+      )
+    }
+
+    // Modelo não encontrado
+    if (msg.includes('404') || msg.includes('not found') || msg.includes('no longer available')) {
+      return NextResponse.json(
+        { error: 'Modelo de IA não disponível. Troque o modelo nas Configurações.' },
+        { status: 404 },
+      )
+    }
+
+    // Arquivo muito grande ou não suportado
+    if (msg.includes('payload') || msg.includes('too large') || msg.includes('INVALID_ARGUMENT')) {
+      return NextResponse.json(
+        { error: 'Arquivo não suportado ou muito grande. Tente um arquivo menor (máx 10MB) ou outro formato.' },
+        { status: 400 },
+      )
+    }
+
+    return NextResponse.json(
+      { error: 'Ocorreu um erro inesperado. Tente novamente.' },
+      { status: 500 },
+    )
   }
 }
 
