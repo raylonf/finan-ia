@@ -247,8 +247,9 @@ export default function ChatPage() {
       const aiMsg: ChatMessage = { id: uuidv4(), role: 'assistant', content: data.message, timestamp: new Date().toISOString() }
       setMessages((prev) => [...prev, aiMsg])
       saveMessage(aiMsg)
-    } catch {
-      const errMsg: ChatMessage = { id: uuidv4(), role: 'assistant', content: 'Desculpe, ocorreu um erro. Verifique sua chave de API nas configurações e tente novamente.', timestamp: new Date().toISOString() }
+    } catch (err) {
+      const errorDetail = err instanceof Error ? err.message : 'Erro desconhecido'
+      const errMsg: ChatMessage = { id: uuidv4(), role: 'assistant', content: `Desculpe, ocorreu um erro: ${errorDetail}`, timestamp: new Date().toISOString() }
       setMessages((prev) => [...prev, errMsg])
       saveMessage(errMsg)
     } finally {

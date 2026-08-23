@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-/** Timeout para chamadas a APIs externas (30 segundos) */
-const AI_TIMEOUT_MS = 30_000
+/** Timeout para chamadas a APIs externas (60 segundos para permitir uploads) */
+const AI_TIMEOUT_MS = 60_000
 
 /** Limites de validação */
 const MAX_MESSAGES = 50
@@ -212,8 +212,9 @@ async function callGemini(
 
   const chat = genModel.startChat({ history })
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = await Promise.race([
-    chat.sendMessage(parts as never),
+    chat.sendMessage(parts as any),
     new Promise<never>((_, reject) =>
       setTimeout(() => {
         const err = new Error('Tempo limite excedido ao chamar Gemini')
