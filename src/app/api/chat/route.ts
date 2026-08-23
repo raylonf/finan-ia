@@ -37,7 +37,14 @@ Se o usuário mencionar uma transação (gasto ou receita), extraia e responda c
 Categorias válidas para despesas: food, transport, housing, health, education, entertainment, shopping, bills, other
 Categorias válidas para receitas: salary, freelance, investment, other
 
-Inclua esse bloco APENAS quando detectar claramente uma transação. Continue a conversa normalmente.`
+Inclua esse bloco APENAS quando detectar claramente uma transação. Continue a conversa normalmente.
+
+Se o usuário pedir para EXCLUIR ou REMOVER uma transação, responda com:
+[DELETE_TRANSACTION]
+{"description":"termo de busca para encontrar a transação"}
+[/DELETE_TRANSACTION]
+
+Use o campo description com palavras-chave da transação que o usuário quer excluir. Por exemplo, se ele disser "exclui o gasto do sorvete", use {"description":"sorvete"}.`
 
 interface ChatMessage {
   role: string

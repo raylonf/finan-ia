@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { ChatMessage, Transaction } from '@/types/finance'
-import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction, getUserSettings } from '@/lib/data'
+import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction, deleteTransaction, getUserSettings } from '@/lib/data'
 import { buildFinancialContext } from '@/lib/utils'
 import { Send, Trash2, Bot, User, MessageSquare, Paperclip, X, FileText, Image, Film, Mic, Square } from 'lucide-react'
 
@@ -226,6 +226,24 @@ export default function ChatPage() {
         } catch {}
       }
 
+      // Detectar exclusão de transação
+      const deleteMatch = data.message.match(/\[DELETE_TRANSACTION\]\s*([\s\S]*?)\s*\[\/DELETE_TRANSACTION\]/)
+      if (deleteMatch) {
+        try {
+          const dd = JSON.parse(deleteMatch[1])
+          if (dd.description) {
+            const transactions = await getTransactions()
+            const searchTerm = dd.description.toLowerCase()
+            const found = transactions.find((t) =>
+              t.description.toLowerCase().includes(searchTerm)
+            )
+            if (found) {
+              await deleteTransaction(found.id)
+            }
+          }
+        } catch {}
+      }
+
       const aiMsg: ChatMessage = { id: uuidv4(), role: 'assistant', content: data.message, timestamp: new Date().toISOString() }
       setMessages((prev) => [...prev, aiMsg])
       saveMessage(aiMsg)
@@ -318,7 +336,7 @@ export default function ChatPage() {
             </div>
             <div className={`max-w-[85%] md:max-w-[75%] ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}>
               <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                {msg.content.replace(/\[TRANSACTION\][\s\S]*?\[\/TRANSACTION\]/g, '').trim()}
+                {msg.content.replace(/\[TRANSACTION\][\s\S]*?\[\/TRANSACTION\]/g, '').replace(/\[DELETE_TRANSACTION\][\s\S]*?\[\/DELETE_TRANSACTION\]/g, '').trim()}
               </div>
               <div className={`text-xs mt-1.5 ${msg.role === 'user' ? 'text-brand-200' : 'text-gray-400'}`}>
                 {new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
