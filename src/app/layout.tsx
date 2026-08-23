@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
-        <div className="flex h-screen">
+        <div className="flex h-[100dvh]">
           <Sidebar />
           <main className="flex-1 overflow-hidden">
             {children}
