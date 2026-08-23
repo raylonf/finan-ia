@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    ignore:
+      # CVE-2025-59472: False positive - affects PPR in minimal mode only.
+      # Our app doesn't use PPR. Version 16.3.2 >= 16.1.5 (patched version).
+      - dependency-name: "next"
+        update-types: ["version-update:semver-patch"]
