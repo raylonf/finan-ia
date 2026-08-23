@@ -1,16 +1,18 @@
 'use client'
 
 /**
- * Camada de dados unificada.
- * Usa Supabase quando o usuário está logado, localStorage como fallback.
+ * Camada de dados unificada — persiste no Supabase.
  */
 
 import { createClient } from '@/lib/supabase/client'
 import { Transaction, ChatMessage } from '@/types/finance'
 
-const supabase = createClient()
+function getSupabase() {
+  return createClient()
+}
 
 async function getUserId(): Promise<string | null> {
+  const supabase = getSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   return user?.id || null
 }
@@ -20,6 +22,7 @@ async function getUserId(): Promise<string | null> {
 // ========================
 
 export async function getTransactions(): Promise<Transaction[]> {
+  const supabase = getSupabase()
   const userId = await getUserId()
   if (!userId) return []
 
@@ -46,6 +49,7 @@ export async function getTransactions(): Promise<Transaction[]> {
 }
 
 export async function saveTransaction(t: { type: string; category: string; description: string; amount: number; date: string }): Promise<void> {
+  const supabase = getSupabase()
   const userId = await getUserId()
   if (!userId) return
 
@@ -62,11 +66,13 @@ export async function saveTransaction(t: { type: string; category: string; descr
 }
 
 export async function deleteTransaction(id: string): Promise<void> {
+  const supabase = getSupabase()
   const { error } = await supabase.from('transactions').delete().eq('id', id)
   if (error) console.error('Erro ao deletar transação:', error)
 }
 
 export async function updateTransaction(t: Transaction): Promise<void> {
+  const supabase = getSupabase()
   const { error } = await supabase
     .from('transactions')
     .update({
@@ -86,6 +92,7 @@ export async function updateTransaction(t: Transaction): Promise<void> {
 // ========================
 
 export async function getMessages(): Promise<ChatMessage[]> {
+  const supabase = getSupabase()
   const userId = await getUserId()
   if (!userId) return []
 
@@ -109,6 +116,7 @@ export async function getMessages(): Promise<ChatMessage[]> {
 }
 
 export async function saveMessage(msg: { role: string; content: string }): Promise<void> {
+  const supabase = getSupabase()
   const userId = await getUserId()
   if (!userId) return
 
@@ -122,6 +130,7 @@ export async function saveMessage(msg: { role: string; content: string }): Promi
 }
 
 export async function clearMessages(): Promise<void> {
+  const supabase = getSupabase()
   const userId = await getUserId()
   if (!userId) return
 
@@ -140,6 +149,7 @@ export interface UserSettings {
 }
 
 export async function getUserSettings(): Promise<UserSettings> {
+  const supabase = getSupabase()
   const userId = await getUserId()
   if (!userId) return { api_key: '', ai_provider: 'gemini', ai_model: 'gemini-3.6-flash' }
 
@@ -149,7 +159,10 @@ export async function getUserSettings(): Promise<UserSettings> {
     .eq('user_id', userId)
     .single()
 
-  if (error || !data) return { api_key: '', ai_provider: 'gemini', ai_model: 'gemini-3.6-flash' }
+  if (error || !data) {
+    console.error('Erro ao buscar settings:', error)
+    return { api_key: '', ai_provider: 'gemini', ai_model: 'gemini-3.6-flash' }
+  }
 
   return {
     api_key: data.api_key || '',
@@ -159,6 +172,7 @@ export async function getUserSettings(): Promise<UserSettings> {
 }
 
 export async function saveUserSettings(settings: Partial<UserSettings>): Promise<void> {
+  const supabase = getSupabase()
   const userId = await getUserId()
   if (!userId) return
 
