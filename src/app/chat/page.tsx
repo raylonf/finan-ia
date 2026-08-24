@@ -310,7 +310,7 @@ export default function ChatPage() {
       <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-white">
         <div className="flex items-center gap-2 ml-10 md:ml-0">
           <MessageSquare className="w-5 h-5 text-brand-600" />
-          <h2 className="font-semibold text-gray-800 text-sm md:text-base">Consultor Financeiro IA</h2>
+          <h2 className="font-semibold text-gray-800 text-sm md:text-base">Lucrécio</h2>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -333,12 +333,12 @@ export default function ChatPage() {
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4" onClick={() => setShowCapabilities(false)}>
           <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto shadow-xl animate-fade-in" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-800 text-lg">O que o Finan IA pode fazer</h3>
+              <h3 className="font-bold text-gray-800 text-lg">O que o Lucrécio pode fazer</h3>
               <button onClick={() => setShowCapabilities(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-sm text-gray-500 mb-4">Sou seu consultor financeiro pessoal. Toque em qualquer item para experimentar:</p>
+            <p className="text-sm text-gray-500 mb-4">Sou o Lucrécio, seu consultor financeiro pessoal. Toque em qualquer item para experimentar:</p>
             <div className="space-y-2">
               {capabilities.map((cap) => {
                 const Icon = cap.icon
@@ -370,9 +370,9 @@ export default function ChatPage() {
             <div className="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center mb-4">
               <Bot className="w-8 h-8 text-brand-600" />
             </div>
-            <h3 className="font-semibold text-gray-700 mb-1">Seu consultor financeiro pessoal</h3>
+            <h3 className="font-semibold text-gray-700 mb-1">Olá! Sou o Lucrécio</h3>
             <p className="text-sm text-gray-500 max-w-sm mb-6">
-              Posso analisar suas finanças, orientar sobre investimentos, ajudar com dívidas e muito mais.
+              Seu consultor financeiro pessoal. Posso analisar suas finanças, orientar sobre investimentos, ajudar com dívidas e muito mais.
             </p>
 
             {/* Quick actions grid */}

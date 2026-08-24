@@ -116,7 +116,7 @@ export default function ConfiguracoesPage() {
             <Settings className="w-6 h-6 text-brand-600" />
             Configurações
           </h2>
-          <p className="text-sm text-gray-500 mt-1">Configure a inteligência artificial do Finan IA</p>
+          <p className="text-sm text-gray-500 mt-1">Configure a inteligência artificial do Lucrécio</p>
         </div>
 
         {/* Provider */}

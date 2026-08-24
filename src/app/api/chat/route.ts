@@ -14,7 +14,7 @@ const VALID_MODELS = [
   'gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo',
 ] as const
 
-const SYSTEM_PROMPT = `Você é o **Finan IA**, um consultor financeiro experiente e orientador pessoal de finanças. Você combina conhecimento profundo de finanças pessoais, investimentos, planejamento tributário e gestão patrimonial com uma abordagem acessível e empática.
+const SYSTEM_PROMPT = `Você é o **Lucrécio**, um consultor financeiro experiente e orientador pessoal de finanças. Você combina conhecimento profundo de finanças pessoais, investimentos, planejamento tributário e gestão patrimonial com uma abordagem acessível e empática.
 
 ## Sua identidade:
 Você é como um consultor financeiro certificado (CFP) particular do usuário — alguém que conhece a situação financeira dele em detalhes e dá orientações personalizadas. Você não é apenas um registrador de gastos, mas um **estrategista financeiro** que ajuda a tomar melhores decisões.
@@ -380,11 +380,11 @@ function generateDemo(msg: string, ctx: string, history: string): string {
   }
 
   if (lower.includes('dica') || lower.includes('conselho') || lower.includes('economizar')) {
-    return `💡 **Dicas do Finan IA:**\n\n1. **Regra 50/30/20:** 50% necessidades, 30% desejos, 20% poupança\n2. **Registre tudo:** Consciência é o primeiro passo\n3. **Fundo de emergência:** 3 a 6 meses de despesas\n4. **Evite parcelamentos:** Se não pode à vista, repense\n5. **Invista cedo:** Mesmo R$ 100/mês faz diferença\n\nPosso ajudar com algo específico?`
+    return `💡 **Dicas do Lucrécio:**\n\n1. **Regra 50/30/20:** 50% necessidades, 30% desejos, 20% poupança\n2. **Registre tudo:** Consciência é o primeiro passo\n3. **Fundo de emergência:** 3 a 6 meses de despesas\n4. **Evite parcelamentos:** Se não pode à vista, repense\n5. **Invista cedo:** Mesmo R$ 100/mês faz diferença\n\nPosso ajudar com algo específico?`
   }
 
   if (lower.includes('oi') || lower.includes('olá') || lower.includes('ola') || lower === '') {
-    return `Olá! 👋 Sou o **Finan IA**, seu assistente financeiro pessoal.\n\nPosso te ajudar a:\n📝 Registrar gastos e receitas\n📊 Analisar suas finanças\n💡 Dar dicas personalizadas\n🎯 Acompanhar seus objetivos\n\nÉ só me contar sobre suas finanças!`
+    return `Olá! 👋 Sou o **Lucrécio**, seu consultor financeiro pessoal.\n\nPosso te ajudar a:\n📝 Registrar gastos e receitas\n📊 Analisar suas finanças\n💡 Dar dicas personalizadas\n🎯 Acompanhar seus objetivos\n\nÉ só me contar sobre suas finanças!`
   }
 
   return `Posso te ajudar com:\n\n• **Registrar transações** - me diga seus gastos e receitas\n• **Análise financeira** - peça um resumo\n• **Dicas** - pergunte sobre economia e investimentos\n\nÉ só falar! 😊`

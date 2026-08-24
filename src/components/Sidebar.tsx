@@ -112,7 +112,7 @@ export function Sidebar() {
             </div>
             <div>
               <h1 className="font-bold text-gray-800 text-lg leading-tight">Finan IA</h1>
-              <p className="text-[10px] text-gray-400">Assistente Financeiro</p>
+              <p className="text-[10px] text-gray-400">Consultor Lucrécio</p>
             </div>
           </div>
           <button
