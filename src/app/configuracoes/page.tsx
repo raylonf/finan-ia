@@ -22,7 +22,10 @@ const MODELS: Record<Provider, { id: string; name: string; description: string }
   openai: [
     { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', description: 'Rápido e econômico, 1M tokens de contexto' },
     { id: 'gpt-4.1', name: 'GPT-4.1', description: 'Potente, ótimo para análise financeira' },
-    { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Mais avançado e inteligente' },
+    { id: 'gpt-5.1', name: 'GPT-5.1', description: 'Avançado, multimodal' },
+    { id: 'gpt-5.2', name: 'GPT-5.2', description: 'Alta performance' },
+    { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Mais inteligente e rápido' },
+    { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', description: 'Máxima capacidade' },
   ],
 }
 
