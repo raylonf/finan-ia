@@ -5,7 +5,8 @@ export function OwlIcon({ className = 'w-5 h-5', invert = false }: { className?:
     <img
       src="/owl-logo.png"
       alt="Finan IA"
-      className={`${className} object-contain ${invert ? 'invert' : ''}`}
+      className={`${className} object-contain ${invert ? 'invert brightness-0 invert' : ''}`}
+      style={{ mixBlendMode: 'multiply' }}
     />
   )
 }

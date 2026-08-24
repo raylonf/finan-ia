@@ -47,8 +47,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center p-2">
-              <OwlIcon className="w-full h-full" invert />
+            <div className="w-12 h-12 flex items-center justify-center">
+              <OwlIcon className="w-12 h-12" />
             </div>
             <span className="font-bold text-gray-800 text-xl">Finan IA</span>
           </div>

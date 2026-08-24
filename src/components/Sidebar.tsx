@@ -243,8 +243,8 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-between p-5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center p-1.5">
-              <OwlIcon className="w-full h-full" invert />
+            <div className="w-10 h-10 flex items-center justify-center">
+              <OwlIcon className="w-10 h-10" />
             </div>
             <div>
               <h1 className={`font-semibold text-base leading-tight ${getTextColor()}`}>Finan IA</h1>
