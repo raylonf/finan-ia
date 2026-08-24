@@ -100,22 +100,19 @@ export function Sidebar() {
   useRealtimeSync('transactions', refreshBalance)
 
   // Gerar cor de degradê baseado no saldo
-  function getSidebarGradient(): string {
+  function getSidebarStyle(): React.CSSProperties {
     if (balanceRatio >= 0.6) {
-      // Positivo → verde intenso
-      return 'from-emerald-100 via-emerald-50 to-green-100'
+      return { background: 'linear-gradient(to bottom, #d1fae5, #ecfdf5, #d1fae5)' } // emerald
     } else if (balanceRatio >= 0.3) {
-      // Neutro → levemente amarelado
-      return 'from-amber-50/80 via-white to-yellow-50/60'
+      return { background: 'linear-gradient(to bottom, #fef9c3, #ffffff, #fef3c7)' } // amber
     } else {
-      // Negativo → vermelho intenso
-      return 'from-red-100 via-rose-50 to-red-100'
+      return { background: 'linear-gradient(to bottom, #fecaca, #fff1f2, #fecaca)' } // red
     }
   }
 
   function getSidebarBorderColor(): string {
     if (balanceRatio >= 0.6) return 'border-emerald-200'
-    if (balanceRatio >= 0.3) return 'border-amber-100'
+    if (balanceRatio >= 0.3) return 'border-amber-200'
     return 'border-red-200'
   }
 
@@ -147,10 +144,11 @@ export function Sidebar() {
 
       {/* Sidebar */}
       <aside
+        style={getSidebarStyle()}
         className={`
           fixed md:static inset-y-0 left-0 z-50
-          w-64 bg-gradient-to-b ${getSidebarGradient()} border-r ${getSidebarBorderColor()} flex flex-col
-          transition-all duration-700 ease-in-out
+          w-64 border-r ${getSidebarBorderColor()} flex flex-col
+          transition-all duration-1000 ease-in-out
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >

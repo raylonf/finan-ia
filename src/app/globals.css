@@ -105,6 +105,11 @@
   }
 }
 
+/* Transição suave de background na sidebar */
+aside[style] {
+  transition: background 1.5s ease-in-out, border-color 1.5s ease-in-out;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }
