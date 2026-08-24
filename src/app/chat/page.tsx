@@ -232,7 +232,7 @@ export default function ChatPage() {
               date: new Date().toISOString(),
               createdAt: new Date().toISOString(),
             }
-            saveTransaction(t)
+            await saveTransaction(t)
           }
         } catch {}
       }

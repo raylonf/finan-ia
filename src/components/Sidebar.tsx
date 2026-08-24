@@ -79,10 +79,10 @@ export function Sidebar() {
       if (transactions.length > 0) updateBalanceRatio(transactions)
     })
 
-    // Polling a cada 10s para manter a cor atualizada
+    // Polling a cada 5s para manter a cor atualizada
     const interval = setInterval(() => {
-      getTransactions().then((t) => { if (t.length > 0) updateBalanceRatio(t) })
-    }, 10000)
+      getTransactions().then((t) => updateBalanceRatio(t))
+    }, 5000)
 
     // Escutar evento customizado quando transações mudam localmente
     function handleTransactionChange() {
@@ -99,13 +99,19 @@ export function Sidebar() {
   function updateBalanceRatio(transactions: { type: string; amount: number }[]) {
     const income = getTotalIncome(transactions as any)
     const expenses = getTotalExpenses(transactions as any)
-    if (income === 0 && expenses === 0) {
-      setBalanceRatio(0.5)
-      return
-    }
-    // Ratio: 1 = muito positivo, 0 = muito negativo
     const balance = income - expenses
-    const ratio = income > 0 ? Math.max(0, Math.min(1, (balance / income) + 0.3)) : (balance >= 0 ? 0.5 : 0)
+
+    let ratio: number
+    if (income === 0 && expenses === 0) {
+      ratio = 0.5 // neutro
+    } else if (balance > 0) {
+      ratio = 0.8 // positivo → verde
+    } else if (balance === 0) {
+      ratio = 0.5 // neutro
+    } else {
+      ratio = 0.1 // negativo → vermelho
+    }
+
     setBalanceRatio(ratio)
   }
 
