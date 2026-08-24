@@ -102,21 +102,21 @@ export function Sidebar() {
   // Gerar cor de degradê baseado no saldo
   function getSidebarGradient(): string {
     if (balanceRatio >= 0.6) {
-      // Positivo → verde suave
-      return 'from-emerald-50/80 via-white to-emerald-50/40'
+      // Positivo → verde intenso
+      return 'from-emerald-100 via-emerald-50 to-green-100'
     } else if (balanceRatio >= 0.3) {
-      // Neutro → branco normal
-      return 'from-white via-white to-gray-50'
+      // Neutro → levemente amarelado
+      return 'from-amber-50/80 via-white to-yellow-50/60'
     } else {
-      // Negativo → vermelho suave
-      return 'from-red-50/60 via-white to-red-50/30'
+      // Negativo → vermelho intenso
+      return 'from-red-100 via-rose-50 to-red-100'
     }
   }
 
   function getSidebarBorderColor(): string {
-    if (balanceRatio >= 0.6) return 'border-emerald-100'
-    if (balanceRatio >= 0.3) return 'border-gray-100'
-    return 'border-red-100'
+    if (balanceRatio >= 0.6) return 'border-emerald-200'
+    if (balanceRatio >= 0.3) return 'border-amber-100'
+    return 'border-red-200'
   }
 
   async function handleLogout() {
