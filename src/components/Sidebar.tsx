@@ -160,11 +160,11 @@ export function Sidebar() {
     let botColor: string
 
     if (r >= 0.5) {
-      // Neutro → Verde warm (0.5 a 1.0)
+      // Neutro → Verde/azulado (0.5 a 1.0)
       const t = (r - 0.5) * 2
-      topColor = lerpColor('#d4c8be', '#c5d5c0', t) // nude → verde suave
-      midColor = lerpColor('#e0d6ce', '#d4e4cf', t)
-      botColor = lerpColor('#ebe3dc', '#e0eddb', t)
+      topColor = lerpColor('#d4c8be', '#b8d4ce', t) // nude → verde-azulado
+      midColor = lerpColor('#e0d6ce', '#c8e0d8', t)
+      botColor = lerpColor('#ebe3dc', '#d8ebe4', t)
     } else {
       // Neutro → Rosé/warm red (0.5 a 0)
       const t = (0.5 - r) * 2
