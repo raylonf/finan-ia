@@ -9,14 +9,27 @@ import { BarChart3 } from 'lucide-react'
 export default function GraficosPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
 
+  const [loaded, setLoaded] = useState(false)
+
   useEffect(() => {
-    getTransactions().then(setTransactions)
+    getTransactions().then((data) => { setTransactions(data); setLoaded(true) })
   }, [])
 
   const monthlyData = getMonthlyData(transactions)
   const expensesByCategory = getByCategory(transactions, 'expense')
   const incomeByCategory = getByCategory(transactions, 'income')
   const totalExpenses = getTotalExpenses(transactions)
+
+  if (!loaded) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-[3px] border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+          <p className="text-sm text-gray-400">Carregando gráficos...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full overflow-y-auto custom-scrollbar">

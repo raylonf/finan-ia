@@ -61,10 +61,12 @@ export default function ReceitasPage() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Transaction | null>(null)
   const [search, setSearch] = useState('')
+  const [loaded, setLoaded] = useState(false)
 
   async function loadData() {
     const all = (await getTransactions()).filter((t) => t.type === 'income')
     setIncomes(all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()))
+    setLoaded(true)
   }
 
   useEffect(() => { loadData() }, [])
@@ -96,6 +98,17 @@ export default function ReceitasPage() {
 
   const total = filtered.reduce((sum, t) => sum + t.amount, 0)
   const grouped = groupByDate(filtered)
+
+  if (!loaded) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-[3px] border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+          <p className="text-sm text-gray-400">Carregando receitas...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full overflow-y-auto custom-scrollbar">

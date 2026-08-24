@@ -18,8 +18,10 @@ import {
 export default function AnalisePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
 
+  const [loaded, setLoaded] = useState(false)
+
   useEffect(() => {
-    getTransactions().then(setTransactions)
+    getTransactions().then((data) => { setTransactions(data); setLoaded(true) })
   }, [])
 
   const income = getTotalIncome(transactions)
@@ -35,6 +37,17 @@ export default function AnalisePage() {
     .slice(0, 3)
 
   const healthScore = calculateHealthScore(income, expenses, savingsRate)
+
+  if (!loaded) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-[3px] border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+          <p className="text-sm text-gray-400">Carregando análise...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full overflow-y-auto custom-scrollbar">
