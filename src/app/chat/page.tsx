@@ -491,16 +491,16 @@ export default function ChatPage() {
           </div>
         ) : (
           /* Input normal */
-          <div className="flex gap-2 items-end max-w-3xl mx-auto">
+          <div className="flex gap-1.5 md:gap-2 items-end max-w-3xl mx-auto">
             {/* Botão de anexo */}
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={loading}
-              className="flex-shrink-0 p-2.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors disabled:opacity-50"
+              className="flex-shrink-0 p-2 md:p-2.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
               title="Anexar arquivo (imagem, PDF, áudio, vídeo)"
               aria-label="Anexar arquivo"
             >
-              <Paperclip className="w-5 h-5" />
+              <Paperclip className="w-4 h-4 md:w-5 md:h-5" />
             </button>
             <input
               ref={fileInputRef}
@@ -516,10 +516,10 @@ export default function ChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Diga algo sobre suas finanças..."
+              placeholder="Pergunte ao Lucrécio..."
               rows={1}
               disabled={loading}
-              className="input-field resize-none flex-1"
+              className="input-field resize-none flex-1 !py-2.5 md:!py-3 text-sm"
               aria-label="Mensagem"
             />
 
@@ -527,7 +527,7 @@ export default function ChatPage() {
             <button
               onClick={startRecording}
               disabled={loading}
-              className="flex-shrink-0 p-2.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+              className="flex-shrink-0 p-2 md:p-2.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
               title="Gravar áudio"
               aria-label="Gravar áudio"
             >
@@ -537,16 +537,13 @@ export default function ChatPage() {
             <button
               onClick={handleSend}
               disabled={(!input.trim() && attachments.length === 0) || loading}
-              className="btn-primary p-2.5 rounded-lg"
+              className="btn-primary !p-2 md:!p-2.5 !rounded-full"
               aria-label="Enviar"
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
         )}
-        <p className="text-xs text-gray-400 text-center mt-2">
-          Suporta: imagens, PDF, áudio, vídeo, documentos (até 20MB)
-        </p>
       </div>
     </div>
   )
