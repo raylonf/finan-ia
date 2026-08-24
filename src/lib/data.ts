@@ -1,11 +1,19 @@
 'use client'
 
 /**
- * Camada de dados unificada — persiste no Supabase.
+ * Camada de dados com cache local (stale-while-revalidate).
+ * - Mostra dados do cache imediatamente
+ * - Busca do Supabase em background e atualiza o cache
  */
 
 import { createClient } from '@/lib/supabase/client'
 import { Transaction, ChatMessage } from '@/types/finance'
+
+const CACHE_KEYS = {
+  TRANSACTIONS: 'finan_ia_cache_transactions',
+  MESSAGES: 'finan_ia_cache_messages',
+  SETTINGS: 'finan_ia_cache_settings',
+}
 
 function getSupabase() {
   return createClient()
@@ -17,6 +25,24 @@ async function getUserId(): Promise<string | null> {
   return user?.id || null
 }
 
+// --- Cache helpers ---
+function getCache<T>(key: string): T | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const data = localStorage.getItem(key)
+    return data ? JSON.parse(data) : null
+  } catch {
+    return null
+  }
+}
+
+function setCache<T>(key: string, data: T): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(key, JSON.stringify(data))
+  } catch {}
+}
+
 // ========================
 // TRANSAÇÕES
 // ========================
@@ -24,7 +50,7 @@ async function getUserId(): Promise<string | null> {
 export async function getTransactions(): Promise<Transaction[]> {
   const supabase = getSupabase()
   const userId = await getUserId()
-  if (!userId) return []
+  if (!userId) return getCache<Transaction[]>(CACHE_KEYS.TRANSACTIONS) || []
 
   const { data, error } = await supabase
     .from('transactions')
@@ -34,10 +60,10 @@ export async function getTransactions(): Promise<Transaction[]> {
 
   if (error) {
     console.error('Erro ao buscar transações:', error)
-    return []
+    return getCache<Transaction[]>(CACHE_KEYS.TRANSACTIONS) || []
   }
 
-  return (data || []).map((t) => ({
+  const transactions = (data || []).map((t) => ({
     id: t.id,
     type: t.type,
     category: t.category,
@@ -46,6 +72,13 @@ export async function getTransactions(): Promise<Transaction[]> {
     date: t.date,
     createdAt: t.created_at,
   }))
+
+  setCache(CACHE_KEYS.TRANSACTIONS, transactions)
+  return transactions
+}
+
+export function getCachedTransactions(): Transaction[] {
+  return getCache<Transaction[]>(CACHE_KEYS.TRANSACTIONS) || []
 }
 
 export async function saveTransaction(t: { type: string; category: string; description: string; amount: number; date: string }): Promise<void> {
@@ -94,7 +127,7 @@ export async function updateTransaction(t: Transaction): Promise<void> {
 export async function getMessages(): Promise<ChatMessage[]> {
   const supabase = getSupabase()
   const userId = await getUserId()
-  if (!userId) return []
+  if (!userId) return getCache<ChatMessage[]>(CACHE_KEYS.MESSAGES) || []
 
   const { data, error } = await supabase
     .from('messages')
@@ -104,15 +137,22 @@ export async function getMessages(): Promise<ChatMessage[]> {
 
   if (error) {
     console.error('Erro ao buscar mensagens:', error)
-    return []
+    return getCache<ChatMessage[]>(CACHE_KEYS.MESSAGES) || []
   }
 
-  return (data || []).map((m) => ({
+  const messages = (data || []).map((m) => ({
     id: m.id,
     role: m.role,
     content: m.content,
     timestamp: m.timestamp,
   }))
+
+  setCache(CACHE_KEYS.MESSAGES, messages)
+  return messages
+}
+
+export function getCachedMessages(): ChatMessage[] {
+  return getCache<ChatMessage[]>(CACHE_KEYS.MESSAGES) || []
 }
 
 export async function saveMessage(msg: { role: string; content: string }): Promise<void> {
@@ -136,6 +176,7 @@ export async function clearMessages(): Promise<void> {
 
   const { error } = await supabase.from('messages').delete().eq('user_id', userId)
   if (error) console.error('Erro ao limpar mensagens:', error)
+  setCache(CACHE_KEYS.MESSAGES, [])
 }
 
 // ========================
@@ -148,10 +189,12 @@ export interface UserSettings {
   ai_model: string
 }
 
+const DEFAULT_SETTINGS: UserSettings = { api_key: '', ai_provider: 'gemini', ai_model: 'gemini-3.6-flash' }
+
 export async function getUserSettings(): Promise<UserSettings> {
   const supabase = getSupabase()
   const userId = await getUserId()
-  if (!userId) return { api_key: '', ai_provider: 'gemini', ai_model: 'gemini-3.6-flash' }
+  if (!userId) return getCache<UserSettings>(CACHE_KEYS.SETTINGS) || DEFAULT_SETTINGS
 
   const { data, error } = await supabase
     .from('user_settings')
@@ -160,21 +203,31 @@ export async function getUserSettings(): Promise<UserSettings> {
     .single()
 
   if (error || !data) {
-    console.error('Erro ao buscar settings:', error)
-    return { api_key: '', ai_provider: 'gemini', ai_model: 'gemini-3.6-flash' }
+    return getCache<UserSettings>(CACHE_KEYS.SETTINGS) || DEFAULT_SETTINGS
   }
 
-  return {
+  const settings: UserSettings = {
     api_key: data.api_key || '',
     ai_provider: data.ai_provider || 'gemini',
     ai_model: data.ai_model || 'gemini-3.6-flash',
   }
+
+  setCache(CACHE_KEYS.SETTINGS, settings)
+  return settings
+}
+
+export function getCachedSettings(): UserSettings {
+  return getCache<UserSettings>(CACHE_KEYS.SETTINGS) || DEFAULT_SETTINGS
 }
 
 export async function saveUserSettings(settings: Partial<UserSettings>): Promise<void> {
   const supabase = getSupabase()
   const userId = await getUserId()
   if (!userId) return
+
+  // Atualizar cache imediatamente
+  const current = getCache<UserSettings>(CACHE_KEYS.SETTINGS) || DEFAULT_SETTINGS
+  setCache(CACHE_KEYS.SETTINGS, { ...current, ...settings })
 
   const { error } = await supabase
     .from('user_settings')

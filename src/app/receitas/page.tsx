@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Transaction, CATEGORY_LABELS, CATEGORY_COLORS, Category } from '@/types/finance'
-import { getTransactions, deleteTransaction } from '@/lib/data'
+import { getTransactions, deleteTransaction, getCachedTransactions } from '@/lib/data'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { TransactionForm } from '@/components/TransactionForm'
 import { useRealtimeSync } from '@/hooks/useRealtimeSync'
@@ -69,7 +69,14 @@ export default function ReceitasPage() {
     setLoaded(true)
   }
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => {
+    const cached = getCachedTransactions().filter((t) => t.type === 'income')
+    if (cached.length > 0) {
+      setIncomes(cached.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()))
+      setLoaded(true)
+    }
+    loadData()
+  }, [])
 
   useRealtimeSync('transactions', useCallback(() => { loadData() }, []))
 

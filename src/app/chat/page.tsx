@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { ChatMessage, Transaction } from '@/types/finance'
-import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction, deleteTransaction, getUserSettings } from '@/lib/data'
+import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction, deleteTransaction, getUserSettings, getCachedMessages } from '@/lib/data'
 import { buildFinancialContext } from '@/lib/utils'
 import { Send, Trash2, Bot, User, MessageSquare, Paperclip, X, FileText, Image, Film, Mic, Square } from 'lucide-react'
 import { MarkdownContent } from '@/components/MarkdownContent'
@@ -32,6 +32,8 @@ export default function ChatPage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    // Mostra cache imediatamente, depois atualiza do servidor
+    setMessages(getCachedMessages())
     getMessages().then(setMessages)
   }, [])
 
