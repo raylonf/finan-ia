@@ -11,7 +11,7 @@ const MAX_CONTEXT_LENGTH = 10000
 const VALID_PROVIDERS = ['gemini', 'openai'] as const
 const VALID_MODELS = [
   'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.7-flash',
-  'gpt-4.1-mini', 'gpt-4.1', 'gpt-5.1', 'gpt-5.2', 'gpt-5.6-sol', 'gpt-5.6-terra',
+  'gpt-5.1', 'gpt-5.2', 'gpt-5.6-sol', 'gpt-5.6-terra',
 ] as const
 
 const SYSTEM_PROMPT = `Você é o **Lucrécio**, um consultor financeiro experiente e orientador pessoal de finanças. Você combina conhecimento profundo de finanças pessoais, investimentos, planejamento tributário e gestão patrimonial com uma abordagem acessível e empática.
@@ -134,7 +134,7 @@ function validateRequest(body: unknown): {
   // Validar model (aceita valores da lista ou usa default)
   const validModel = (typeof model === 'string' && model.length <= 50)
     ? model
-    : validProvider === 'gemini' ? 'gemini-3.6-flash' : 'gpt-4.1-mini'
+    : validProvider === 'gemini' ? 'gemini-3.6-flash' : 'gpt-5.1'
 
   // Sanitizar context
   const validContext = typeof financialContext === 'string'

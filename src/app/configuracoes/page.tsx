@@ -20,8 +20,6 @@ const MODELS: Record<Provider, { id: string; name: string; description: string }
     { id: 'gemini-3.7-flash', name: 'Gemini 3.7 Flash', description: 'Mais avançado, coding e agentes' },
   ],
   openai: [
-    { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini', description: 'Rápido e econômico, 1M tokens de contexto' },
-    { id: 'gpt-4.1', name: 'GPT-4.1', description: 'Potente, ótimo para análise financeira' },
     { id: 'gpt-5.1', name: 'GPT-5.1', description: 'Avançado, multimodal' },
     { id: 'gpt-5.2', name: 'GPT-5.2', description: 'Alta performance' },
     { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Mais inteligente e rápido' },
