@@ -103,3 +103,11 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- ========================================
+-- Habilitar Realtime nas tabelas
+-- Execute este trecho se ainda não habilitou
+-- ========================================
+alter publication supabase_realtime add table transactions;
+alter publication supabase_realtime add table messages;
+alter publication supabase_realtime add table user_settings;

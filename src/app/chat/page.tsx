@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { ChatMessage, Transaction } from '@/types/finance'
 import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction, deleteTransaction, getUserSettings } from '@/lib/data'
 import { buildFinancialContext } from '@/lib/utils'
 import { Send, Trash2, Bot, User, MessageSquare, Paperclip, X, FileText, Image, Film, Mic, Square } from 'lucide-react'
 import { MarkdownContent } from '@/components/MarkdownContent'
+import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 
 interface FileAttachment {
   id: string
@@ -33,6 +34,12 @@ export default function ChatPage() {
   useEffect(() => {
     getMessages().then(setMessages)
   }, [])
+
+  const reloadMessages = useCallback(() => {
+    getMessages().then(setMessages)
+  }, [])
+
+  useRealtimeSync('messages', reloadMessages)
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })

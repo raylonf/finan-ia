@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Transaction, CATEGORY_LABELS, CATEGORY_COLORS, Category } from '@/types/finance'
 import { getTransactions, deleteTransaction } from '@/lib/data'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { TransactionForm } from '@/components/TransactionForm'
+import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 import {
   Plus, Trash2, Pencil, ArrowDownCircle, Search,
   UtensilsCrossed, Car, Home, Heart, GraduationCap,
@@ -73,6 +74,8 @@ export default function DespesasPage() {
   }
 
   useEffect(() => { loadData() }, [])
+
+  useRealtimeSync('transactions', useCallback(() => { loadData() }, []))
 
   async function handleDelete(id: string) {
     await deleteTransaction(id)
