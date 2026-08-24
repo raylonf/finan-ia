@@ -78,6 +78,22 @@ export function Sidebar() {
     getTransactions().then((transactions) => {
       if (transactions.length > 0) updateBalanceRatio(transactions)
     })
+
+    // Polling a cada 10s para manter a cor atualizada
+    const interval = setInterval(() => {
+      getTransactions().then((t) => { if (t.length > 0) updateBalanceRatio(t) })
+    }, 10000)
+
+    // Escutar evento customizado quando transações mudam localmente
+    function handleTransactionChange() {
+      getTransactions().then((t) => { if (t.length > 0) updateBalanceRatio(t) })
+    }
+    window.addEventListener('transaction-changed', handleTransactionChange)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('transaction-changed', handleTransactionChange)
+    }
   }, [])
 
   function updateBalanceRatio(transactions: { type: string; amount: number }[]) {

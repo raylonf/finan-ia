@@ -96,12 +96,14 @@ export async function saveTransaction(t: { type: string; category: string; descr
   })
 
   if (error) console.error('Erro ao salvar transação:', error)
+  else window.dispatchEvent(new Event('transaction-changed'))
 }
 
 export async function deleteTransaction(id: string): Promise<void> {
   const supabase = getSupabase()
   const { error } = await supabase.from('transactions').delete().eq('id', id)
   if (error) console.error('Erro ao deletar transação:', error)
+  else window.dispatchEvent(new Event('transaction-changed'))
 }
 
 export async function updateTransaction(t: Transaction): Promise<void> {
@@ -118,6 +120,7 @@ export async function updateTransaction(t: Transaction): Promise<void> {
     .eq('id', t.id)
 
   if (error) console.error('Erro ao atualizar transação:', error)
+  else window.dispatchEvent(new Event('transaction-changed'))
 }
 
 // ========================
