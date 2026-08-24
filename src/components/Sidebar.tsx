@@ -102,18 +102,56 @@ export function Sidebar() {
   // Gerar cor de degradê baseado no saldo
   function getSidebarStyle(): React.CSSProperties {
     if (balanceRatio >= 0.6) {
-      return { background: 'linear-gradient(to bottom, #d1fae5, #ecfdf5, #d1fae5)' } // emerald
+      // Positivo → verde escuro elegante
+      return { background: 'linear-gradient(180deg, #064e3b 0%, #065f46 50%, #047857 100%)' }
     } else if (balanceRatio >= 0.3) {
-      return { background: 'linear-gradient(to bottom, #fef9c3, #ffffff, #fef3c7)' } // amber
+      // Neutro → tom escuro neutro
+      return { background: 'linear-gradient(180deg, #1f2937 0%, #374151 50%, #4b5563 100%)' }
     } else {
-      return { background: 'linear-gradient(to bottom, #fecaca, #fff1f2, #fecaca)' } // red
+      // Negativo → vermelho escuro
+      return { background: 'linear-gradient(180deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%)' }
     }
   }
 
   function getSidebarBorderColor(): string {
-    if (balanceRatio >= 0.6) return 'border-emerald-200'
-    if (balanceRatio >= 0.3) return 'border-amber-200'
-    return 'border-red-200'
+    if (balanceRatio >= 0.6) return 'border-emerald-900'
+    if (balanceRatio >= 0.3) return 'border-gray-700'
+    return 'border-red-900'
+  }
+
+  // Cores dos textos/botões que combinam com o fundo
+  function getTextColor(): string {
+    return 'text-white'
+  }
+
+  function getSubtextColor(): string {
+    if (balanceRatio >= 0.6) return 'text-emerald-200'
+    if (balanceRatio >= 0.3) return 'text-gray-300'
+    return 'text-red-200'
+  }
+
+  function getActiveItemStyle(): string {
+    if (balanceRatio >= 0.6) return 'bg-emerald-800/50 text-white'
+    if (balanceRatio >= 0.3) return 'bg-gray-600/50 text-white'
+    return 'bg-red-800/50 text-white'
+  }
+
+  function getInactiveItemStyle(): string {
+    if (balanceRatio >= 0.6) return 'text-emerald-100 hover:bg-emerald-800/30 hover:text-white'
+    if (balanceRatio >= 0.3) return 'text-gray-300 hover:bg-gray-600/30 hover:text-white'
+    return 'text-red-100 hover:bg-red-800/30 hover:text-white'
+  }
+
+  function getIconActiveStyle(): string {
+    if (balanceRatio >= 0.6) return 'bg-emerald-400 shadow-emerald-400/30'
+    if (balanceRatio >= 0.3) return 'bg-gray-400 shadow-gray-400/30'
+    return 'bg-red-400 shadow-red-400/30'
+  }
+
+  function getIconInactiveStyle(): string {
+    if (balanceRatio >= 0.6) return 'bg-emerald-800/60'
+    if (balanceRatio >= 0.3) return 'bg-gray-600/60'
+    return 'bg-red-800/60'
   }
 
   async function handleLogout() {
@@ -153,19 +191,19 @@ export function Sidebar() {
         `}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-500/20">
+            <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm">
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-gray-800 text-lg leading-tight">Finan IA</h1>
-              <p className="text-[10px] text-gray-400">Consultor Lucrécio</p>
+              <h1 className={`font-bold text-lg leading-tight ${getTextColor()}`}>Finan IA</h1>
+              <p className={`text-[10px] ${getSubtextColor()}`}>Consultor Lucrécio</p>
             </div>
           </div>
           <button
             onClick={() => setMobileOpen(false)}
-            className="md:hidden p-1 text-gray-400 hover:text-gray-600"
+            className="md:hidden p-1 text-white/60 hover:text-white"
             aria-label="Fechar menu"
           >
             <X className="w-5 h-5" />
@@ -176,7 +214,7 @@ export function Sidebar() {
         <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
           {navSections.map((section) => (
             <div key={section.title}>
-              <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+              <p className={`px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider ${getSubtextColor()}`}>
                 {section.title}
               </p>
               <div className="space-y-0.5">
@@ -188,16 +226,14 @@ export function Sidebar() {
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      className={`nav-item group ${isActive ? 'nav-item-active' : 'nav-item-inactive'}`}
+                      className={`nav-item group ${isActive ? getActiveItemStyle() : getInactiveItemStyle()}`}
                     >
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                        isActive
-                          ? 'bg-gradient-to-br from-brand-500 to-brand-700 shadow-sm shadow-brand-500/20'
-                          : 'bg-gray-100 group-hover:bg-gray-200'
+                        isActive ? `${getIconActiveStyle()} shadow-sm` : getIconInactiveStyle()
                       }`}>
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700'}`} />
+                        <Icon className="w-4 h-4 text-white" />
                       </div>
-                      <span className={`text-sm font-medium ${isActive ? 'text-brand-700' : 'text-gray-600 group-hover:text-gray-800'}`}>
+                      <span className="text-sm font-medium">
                         {item.label}
                       </span>
                     </Link>
@@ -209,21 +245,21 @@ export function Sidebar() {
         </nav>
 
         {/* Footer - Usuário */}
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
-              <span className="text-xs font-bold text-brand-700">
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <span className="text-xs font-bold text-white">
                 {userName ? userName.charAt(0).toUpperCase() : '?'}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-gray-700 truncate">{userName || 'Usuário'}</p>
-              <p className="text-[10px] text-gray-400 truncate">{userEmail}</p>
+              <p className={`text-xs font-medium truncate ${getTextColor()}`}>{userName || 'Usuário'}</p>
+              <p className={`text-[10px] truncate ${getSubtextColor()}`}>{userEmail}</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="mt-3 w-full text-xs text-gray-400 hover:text-red-500 transition-colors text-left"
+            className={`mt-3 w-full text-xs transition-colors text-left ${getSubtextColor()} hover:text-white`}
           >
             Sair da conta
           </button>
