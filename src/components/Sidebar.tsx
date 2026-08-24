@@ -55,6 +55,20 @@ const navSections: NavSection[] = [
   },
 ]
 
+// Interpolar entre duas cores hex
+function lerpColor(a: string, b: string, t: number): string {
+  const ar = parseInt(a.slice(1, 3), 16)
+  const ag = parseInt(a.slice(3, 5), 16)
+  const ab = parseInt(a.slice(5, 7), 16)
+  const br = parseInt(b.slice(1, 3), 16)
+  const bg = parseInt(b.slice(3, 5), 16)
+  const bb = parseInt(b.slice(5, 7), 16)
+  const rr = Math.round(ar + (br - ar) * t)
+  const rg = Math.round(ag + (bg - ag) * t)
+  const rb = Math.round(ab + (bb - ab) * t)
+  return `#${rr.toString(16).padStart(2, '0')}${rg.toString(16).padStart(2, '0')}${rb.toString(16).padStart(2, '0')}`
+}
+
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
@@ -99,17 +113,33 @@ export function Sidebar() {
   function updateBalanceRatio(transactions: { type: string; amount: number }[]) {
     const income = getTotalIncome(transactions as any)
     const expenses = getTotalExpenses(transactions as any)
-    const balance = income - expenses
+
+    if (income === 0 && expenses === 0) {
+      setBalanceRatio(0.5)
+      return
+    }
+
+    // Percentual comprometido da receita
+    const compromised = income > 0 ? expenses / income : (expenses > 0 ? 1.5 : 0.5)
+
+    // Escala:
+    // 0-60% comprometido → verde puro
+    // 60-90% → transição verde → neutro
+    // 90-100% → transição neutro → vermelho
+    // >100% → vermelho intenso
 
     let ratio: number
-    if (income === 0 && expenses === 0) {
-      ratio = 0.5 // neutro
-    } else if (balance > 0) {
-      ratio = 0.8 // positivo → verde
-    } else if (balance === 0) {
-      ratio = 0.5 // neutro
+    if (compromised <= 0.6) {
+      ratio = 1.0 // verde total
+    } else if (compromised <= 0.9) {
+      // Transição linear de verde (1.0) para neutro (0.5)
+      ratio = 1.0 - ((compromised - 0.6) / 0.3) * 0.5
+    } else if (compromised <= 1.0) {
+      // Transição de neutro (0.5) para vermelho (0.2)
+      ratio = 0.5 - ((compromised - 0.9) / 0.1) * 0.3
     } else {
-      ratio = 0.1 // negativo → vermelho
+      // Acima de 100% → vermelho intenso
+      ratio = Math.max(0, 0.2 - (compromised - 1.0) * 0.2)
     }
 
     setBalanceRatio(ratio)
@@ -121,58 +151,68 @@ export function Sidebar() {
   }, [])
   useRealtimeSync('transactions', refreshBalance)
 
-  // Gerar cor de degradê baseado no saldo
+  // Gerar cor de degradê gradual baseado no ratio
   function getSidebarStyle(): React.CSSProperties {
-    if (balanceRatio >= 0.6) {
-      // Positivo → verde escuro elegante
-      return { background: 'linear-gradient(180deg, #064e3b 0%, #065f46 50%, #047857 100%)' }
-    } else if (balanceRatio >= 0.3) {
-      // Neutro → tom escuro neutro
-      return { background: 'linear-gradient(180deg, #1f2937 0%, #374151 50%, #4b5563 100%)' }
+    const r = balanceRatio
+
+    let topColor: string
+    let midColor: string
+    let botColor: string
+
+    if (r >= 0.5) {
+      // Neutro → Verde (0.5 a 1.0)
+      const t = (r - 0.5) * 2 // 0 a 1
+      topColor = lerpColor('#1f2937', '#064e3b', t)
+      midColor = lerpColor('#374151', '#065f46', t)
+      botColor = lerpColor('#4b5563', '#047857', t)
     } else {
-      // Negativo → vermelho escuro
-      return { background: 'linear-gradient(180deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%)' }
+      // Neutro → Vermelho (0.5 a 0)
+      const t = (0.5 - r) * 2 // 0 a 1
+      topColor = lerpColor('#1f2937', '#7f1d1d', t)
+      midColor = lerpColor('#374151', '#991b1b', t)
+      botColor = lerpColor('#4b5563', '#b91c1c', t)
     }
+
+    return { background: `linear-gradient(180deg, ${topColor} 0%, ${midColor} 50%, ${botColor} 100%)` }
   }
 
   function getSidebarBorderColor(): string {
-    if (balanceRatio >= 0.6) return 'border-emerald-900'
-    if (balanceRatio >= 0.3) return 'border-gray-700'
+    if (balanceRatio >= 0.7) return 'border-emerald-900'
+    if (balanceRatio >= 0.4) return 'border-gray-700'
     return 'border-red-900'
   }
 
-  // Cores dos textos/botões que combinam com o fundo
   function getTextColor(): string {
     return 'text-white'
   }
 
   function getSubtextColor(): string {
-    if (balanceRatio >= 0.6) return 'text-emerald-200'
-    if (balanceRatio >= 0.3) return 'text-gray-300'
+    if (balanceRatio >= 0.7) return 'text-emerald-200'
+    if (balanceRatio >= 0.4) return 'text-gray-300'
     return 'text-red-200'
   }
 
   function getActiveItemStyle(): string {
-    if (balanceRatio >= 0.6) return 'bg-emerald-800/50 text-white'
-    if (balanceRatio >= 0.3) return 'bg-gray-600/50 text-white'
+    if (balanceRatio >= 0.7) return 'bg-emerald-800/50 text-white'
+    if (balanceRatio >= 0.4) return 'bg-gray-600/50 text-white'
     return 'bg-red-800/50 text-white'
   }
 
   function getInactiveItemStyle(): string {
-    if (balanceRatio >= 0.6) return 'text-emerald-100 hover:bg-emerald-800/30 hover:text-white'
-    if (balanceRatio >= 0.3) return 'text-gray-300 hover:bg-gray-600/30 hover:text-white'
+    if (balanceRatio >= 0.7) return 'text-emerald-100 hover:bg-emerald-800/30 hover:text-white'
+    if (balanceRatio >= 0.4) return 'text-gray-300 hover:bg-gray-600/30 hover:text-white'
     return 'text-red-100 hover:bg-red-800/30 hover:text-white'
   }
 
   function getIconActiveStyle(): string {
-    if (balanceRatio >= 0.6) return 'bg-emerald-400 shadow-emerald-400/30'
-    if (balanceRatio >= 0.3) return 'bg-gray-400 shadow-gray-400/30'
+    if (balanceRatio >= 0.7) return 'bg-emerald-400 shadow-emerald-400/30'
+    if (balanceRatio >= 0.4) return 'bg-gray-400 shadow-gray-400/30'
     return 'bg-red-400 shadow-red-400/30'
   }
 
   function getIconInactiveStyle(): string {
-    if (balanceRatio >= 0.6) return 'bg-emerald-800/60'
-    if (balanceRatio >= 0.3) return 'bg-gray-600/60'
+    if (balanceRatio >= 0.7) return 'bg-emerald-800/60'
+    if (balanceRatio >= 0.4) return 'bg-gray-600/60'
     return 'bg-red-800/60'
   }
 
