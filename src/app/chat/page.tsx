@@ -368,8 +368,8 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3 md:space-y-4 custom-scrollbar">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in">
-            <div className="w-24 h-24 flex items-center justify-center mb-4">
-              <OwlIcon className="w-24 h-24" />
+            <div className="w-28 h-28 flex items-center justify-center mb-4">
+              <OwlIcon className="w-28 h-28" />
             </div>
             <h3 className="font-semibold text-gray-700 mb-1">Olá! Sou o Lucrécio</h3>
             <p className="text-sm text-gray-500 max-w-sm mb-6">
