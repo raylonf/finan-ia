@@ -6,6 +6,7 @@ import { ChatMessage, Transaction } from '@/types/finance'
 import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction, deleteTransaction, getUserSettings } from '@/lib/data'
 import { buildFinancialContext } from '@/lib/utils'
 import { Send, Trash2, Bot, User, MessageSquare, Paperclip, X, FileText, Image, Film, Mic, Square } from 'lucide-react'
+import { MarkdownContent } from '@/components/MarkdownContent'
 
 interface FileAttachment {
   id: string
@@ -336,9 +337,16 @@ export default function ChatPage() {
               {msg.role === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-gray-600" />}
             </div>
             <div className={`max-w-[85%] md:max-w-[75%] ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}>
-              <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                {msg.content.replace(/\[TRANSACTION\][\s\S]*?\[\/TRANSACTION\]/g, '').replace(/\[DELETE_TRANSACTION\][\s\S]*?\[\/DELETE_TRANSACTION\]/g, '').trim()}
-              </div>
+              {msg.role === 'assistant' ? (
+                <MarkdownContent
+                  content={msg.content.replace(/\[TRANSACTION\][\s\S]*?\[\/TRANSACTION\]/g, '').replace(/\[DELETE_TRANSACTION\][\s\S]*?\[\/DELETE_TRANSACTION\]/g, '').trim()}
+                  className="text-sm leading-relaxed"
+                />
+              ) : (
+                <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                  {msg.content.replace(/\[TRANSACTION\][\s\S]*?\[\/TRANSACTION\]/g, '').replace(/\[DELETE_TRANSACTION\][\s\S]*?\[\/DELETE_TRANSACTION\]/g, '').trim()}
+                </div>
+              )}
               <div className={`text-xs mt-1.5 ${msg.role === 'user' ? 'text-brand-200' : 'text-gray-400'}`}>
                 {new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </div>

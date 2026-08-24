@@ -36,6 +36,29 @@
   .chat-bubble-assistant {
     @apply bg-white text-gray-800 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100;
   }
+
+  /* Markdown dentro das bolhas */
+  .markdown-content strong {
+    @apply font-semibold;
+  }
+  .markdown-content em {
+    @apply italic;
+  }
+  .markdown-content ul, .markdown-content ol {
+    @apply my-2 space-y-1;
+  }
+  .markdown-content li {
+    @apply ml-4;
+  }
+  .markdown-content hr {
+    @apply my-3 border-gray-200;
+  }
+  .markdown-content h3 {
+    @apply font-semibold mt-3 mb-1;
+  }
+  .markdown-content h4 {
+    @apply font-semibold text-sm mt-3 mb-1;
+  }
   .card {
     @apply bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200;
   }
