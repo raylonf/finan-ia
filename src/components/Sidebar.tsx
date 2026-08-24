@@ -13,9 +13,12 @@ import {
   Menu,
   X,
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getCachedTransactions, getTransactions } from '@/lib/data'
+import { getTotalIncome, getTotalExpenses } from '@/lib/utils'
+import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 
 interface NavItem {
   href: string
@@ -58,6 +61,7 @@ export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
+  const [balanceRatio, setBalanceRatio] = useState(0.5) // 0 = negativo, 0.5 = neutro, 1 = positivo
 
   useEffect(() => {
     const supabase = createClient()
@@ -67,7 +71,53 @@ export function Sidebar() {
         setUserEmail(user.email || '')
       }
     })
+
+    // Calcular saldo para cor da sidebar
+    const cached = getCachedTransactions()
+    if (cached.length > 0) updateBalanceRatio(cached)
+    getTransactions().then((transactions) => {
+      if (transactions.length > 0) updateBalanceRatio(transactions)
+    })
   }, [])
+
+  function updateBalanceRatio(transactions: { type: string; amount: number }[]) {
+    const income = getTotalIncome(transactions as any)
+    const expenses = getTotalExpenses(transactions as any)
+    if (income === 0 && expenses === 0) {
+      setBalanceRatio(0.5)
+      return
+    }
+    // Ratio: 1 = muito positivo, 0 = muito negativo
+    const balance = income - expenses
+    const ratio = income > 0 ? Math.max(0, Math.min(1, (balance / income) + 0.3)) : (balance >= 0 ? 0.5 : 0)
+    setBalanceRatio(ratio)
+  }
+
+  // Atualizar cor quando transações mudam em tempo real
+  const refreshBalance = useCallback(() => {
+    getTransactions().then((t) => { if (t.length > 0) updateBalanceRatio(t) })
+  }, [])
+  useRealtimeSync('transactions', refreshBalance)
+
+  // Gerar cor de degradê baseado no saldo
+  function getSidebarGradient(): string {
+    if (balanceRatio >= 0.6) {
+      // Positivo → verde suave
+      return 'from-emerald-50/80 via-white to-emerald-50/40'
+    } else if (balanceRatio >= 0.3) {
+      // Neutro → branco normal
+      return 'from-white via-white to-gray-50'
+    } else {
+      // Negativo → vermelho suave
+      return 'from-red-50/60 via-white to-red-50/30'
+    }
+  }
+
+  function getSidebarBorderColor(): string {
+    if (balanceRatio >= 0.6) return 'border-emerald-100'
+    if (balanceRatio >= 0.3) return 'border-gray-100'
+    return 'border-red-100'
+  }
 
   async function handleLogout() {
     const supabase = createClient()
@@ -99,8 +149,8 @@ export function Sidebar() {
       <aside
         className={`
           fixed md:static inset-y-0 left-0 z-50
-          w-64 bg-white border-r border-gray-100 flex flex-col
-          transition-transform duration-200
+          w-64 bg-gradient-to-b ${getSidebarGradient()} border-r ${getSidebarBorderColor()} flex flex-col
+          transition-all duration-700 ease-in-out
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >
