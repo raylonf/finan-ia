@@ -23,6 +23,7 @@ const MODELS: Record<Provider, { id: string; name: string; description: string }
     { id: 'gpt-5.1', name: 'GPT-5.1', description: 'Avançado, multimodal' },
     { id: 'gpt-5.2', name: 'GPT-5.2', description: 'Alta performance' },
     { id: 'gpt-5.6-sol', name: 'GPT-5.6 Sol', description: 'Mais inteligente e rápido' },
+    { id: 'gpt-5.6-luna', name: 'GPT-5.6 Luna', description: 'Raciocínio avançado' },
     { id: 'gpt-5.6-terra', name: 'GPT-5.6 Terra', description: 'Máxima capacidade' },
   ],
 }
