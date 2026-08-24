@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Bot, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { OwlIcon } from '@/components/OwlIcon'
+import { Eye, EyeOff, ArrowRight } from 'lucide-react'
 
 export default function CadastroPage() {
   const router = useRouter()
@@ -57,8 +58,8 @@ export default function CadastroPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg bg-brand-600 flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center">
+              <OwlIcon className="w-6 h-6 text-white" />
             </div>
             <span className="font-bold text-gray-800 text-xl">Finan IA</span>
           </div>

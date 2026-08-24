@@ -9,10 +9,10 @@ import {
   BarChart3,
   PieChart,
   Settings,
-  Bot,
   Menu,
   X,
 } from 'lucide-react'
+import { OwlIcon } from '@/components/OwlIcon'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -244,7 +244,7 @@ export function Sidebar() {
         <div className="flex items-center justify-between p-5">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-white" />
+              <OwlIcon className="w-4 h-4 text-white" />
             </div>
             <div>
               <h1 className={`font-semibold text-base leading-tight ${getTextColor()}`}>Finan IA</h1>
