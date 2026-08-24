@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { ChatMessage, Transaction } from '@/types/finance'
 import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction, deleteTransaction, getUserSettings, getCachedMessages } from '@/lib/data'
 import { buildFinancialContext } from '@/lib/utils'
-import { Send, Trash2, Bot, User, MessageSquare, Paperclip, X, FileText, Image, Film, Mic, Square } from 'lucide-react'
+import { Send, Trash2, Bot, User, MessageSquare, Paperclip, X, FileText, Image, Film, Mic, Square, HelpCircle, TrendingUp, PiggyBank, Receipt, Calculator, Target, CreditCard } from 'lucide-react'
 import { MarkdownContent } from '@/components/MarkdownContent'
 import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 
@@ -24,6 +24,7 @@ export default function ChatPage() {
   const [attachments, setAttachments] = useState<FileAttachment[]>([])
   const [recording, setRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
+  const [showCapabilities, setShowCapabilities] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -292,11 +293,15 @@ export default function ChatPage() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
-  const suggestions = [
-    'Recebi R$ 5.000 de salário',
-    'Gastei R$ 200 no mercado',
-    'Como estão minhas finanças?',
-    'Me dê dicas de economia',
+  const capabilities = [
+    { icon: Receipt, label: 'Registrar gastos e receitas', example: 'Gastei R$ 150 no mercado', color: 'text-blue-500' },
+    { icon: TrendingUp, label: 'Analisar investimentos', example: 'Quero investir R$ 500/mês', color: 'text-green-500' },
+    { icon: CreditCard, label: 'Gerenciar dívidas', example: 'Como sair das dívidas?', color: 'text-red-500' },
+    { icon: PiggyBank, label: 'Planejar economia', example: 'Quero juntar R$ 30 mil', color: 'text-yellow-500' },
+    { icon: Calculator, label: 'Orientar sobre IR', example: 'Me ajuda com a declaração', color: 'text-purple-500' },
+    { icon: Target, label: 'Definir metas financeiras', example: 'Monte um plano para mim', color: 'text-brand-500' },
+    { icon: FileText, label: 'Analisar faturas e extratos', example: 'Envie um PDF de fatura', color: 'text-orange-500' },
+    { icon: Mic, label: 'Receber áudios', example: 'Grave um áudio com seu gasto', color: 'text-teal-500' },
   ]
 
   return (
@@ -305,14 +310,58 @@ export default function ChatPage() {
       <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-white">
         <div className="flex items-center gap-2 ml-10 md:ml-0">
           <MessageSquare className="w-5 h-5 text-brand-600" />
-          <h2 className="font-semibold text-gray-800 text-sm md:text-base">Chat com Finan IA</h2>
+          <h2 className="font-semibold text-gray-800 text-sm md:text-base">Consultor Financeiro IA</h2>
         </div>
-        {messages.length > 0 && (
-          <button onClick={handleClear} className="text-gray-400 hover:text-red-500 transition-colors" title="Limpar conversa">
-            <Trash2 className="w-4 h-4" />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowCapabilities(!showCapabilities)}
+            className="p-2 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+            title="O que posso fazer"
+          >
+            <HelpCircle className="w-4 h-4" />
           </button>
-        )}
+          {messages.length > 0 && (
+            <button onClick={handleClear} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors" title="Limpar conversa">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Modal de capacidades */}
+      {showCapabilities && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4" onClick={() => setShowCapabilities(false)}>
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto shadow-xl animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-gray-800 text-lg">O que o Finan IA pode fazer</h3>
+              <button onClick={() => setShowCapabilities(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">Sou seu consultor financeiro pessoal. Toque em qualquer item para experimentar:</p>
+            <div className="space-y-2">
+              {capabilities.map((cap) => {
+                const Icon = cap.icon
+                return (
+                  <button
+                    key={cap.label}
+                    onClick={() => { setInput(cap.example); setShowCapabilities(false); setTimeout(() => handleSend(), 100) }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-brand-200 hover:bg-brand-50/50 transition-all text-left"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
+                      <Icon className={`w-5 h-5 ${cap.color}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">{cap.label}</p>
+                      <p className="text-xs text-gray-400">&ldquo;{cap.example}&rdquo;</p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3 md:space-y-4 custom-scrollbar">
@@ -321,22 +370,35 @@ export default function ChatPage() {
             <div className="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center mb-4">
               <Bot className="w-8 h-8 text-brand-600" />
             </div>
-            <h3 className="font-semibold text-gray-700 mb-2">Olá! Sou o Finan IA</h3>
+            <h3 className="font-semibold text-gray-700 mb-1">Seu consultor financeiro pessoal</h3>
             <p className="text-sm text-gray-500 max-w-sm mb-6">
-              Me conte sobre suas finanças. Registro transações, analiso seus gastos e dou dicas personalizadas.
-              Você também pode enviar arquivos (PDF, imagens, áudio, vídeo).
+              Posso analisar suas finanças, orientar sobre investimentos, ajudar com dívidas e muito mais.
             </p>
-            <div className="grid gap-2 w-full max-w-sm">
-              {suggestions.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => { setInput(s); setTimeout(() => handleSend(), 0) }}
-                  className="text-left text-sm px-4 py-2.5 rounded-lg bg-white border border-gray-200 hover:border-brand-300 hover:bg-brand-50 transition-colors"
-                >
-                  {s}
-                </button>
-              ))}
+
+            {/* Quick actions grid */}
+            <div className="grid grid-cols-2 gap-2 w-full max-w-sm mb-4">
+              {capabilities.slice(0, 4).map((cap) => {
+                const Icon = cap.icon
+                return (
+                  <button
+                    key={cap.label}
+                    onClick={() => { setInput(cap.example); setTimeout(() => handleSend(), 0) }}
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white border border-gray-100 hover:border-brand-200 hover:bg-brand-50/50 transition-all"
+                  >
+                    <Icon className={`w-5 h-5 ${cap.color}`} />
+                    <span className="text-xs text-gray-600 text-center leading-tight">{cap.label}</span>
+                  </button>
+                )
+              })}
             </div>
+
+            <button
+              onClick={() => setShowCapabilities(true)}
+              className="text-xs text-brand-600 hover:underline flex items-center gap-1"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              Ver tudo que posso fazer
+            </button>
           </div>
         )}
 
