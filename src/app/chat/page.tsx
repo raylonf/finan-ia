@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { ChatMessage, Transaction } from '@/types/finance'
 import { getMessages, saveMessage, clearMessages, getTransactions, saveTransaction, deleteTransaction, getUserSettings, getCachedMessages } from '@/lib/data'
 import { buildFinancialContext } from '@/lib/utils'
-import { Send, Trash2, User, MessageSquare, Paperclip, X, FileText, Image, Film, Mic, Square, HelpCircle, TrendingUp, PiggyBank, Receipt, Calculator, Target, CreditCard } from 'lucide-react'
+import { Send, Trash2, MessageSquare, Paperclip, X, FileText, Image, Film, Mic, Square, HelpCircle, TrendingUp, PiggyBank, Receipt, Calculator, Target, CreditCard } from 'lucide-react'
 import { MarkdownContent } from '@/components/MarkdownContent'
 import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 import { OwlIcon } from '@/components/OwlIcon'
@@ -405,21 +405,21 @@ export default function ChatPage() {
 
         {messages.map((msg) => (
           <div key={msg.id} className={`flex gap-3 animate-fade-in ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${msg.role === 'user' ? 'bg-[#2d2d2d]' : ''}`}>
-              {msg.role === 'user' ? <User className="w-4 h-4 text-white" /> : <OwlIcon className="w-7 h-7" />}
+            <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${msg.role === 'user' ? 'bg-[#2d2d2d]' : ''}`}>
+              {msg.role === 'user' ? <span className="text-[10px] font-medium text-white">Eu</span> : <OwlIcon className="w-7 h-7" />}
             </div>
             <div className={`max-w-[85%] md:max-w-[75%] ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}>
               {msg.role === 'assistant' ? (
                 <MarkdownContent
                   content={msg.content.replace(/\[TRANSACTION\][\s\S]*?\[\/TRANSACTION\]/g, '').replace(/\[DELETE_TRANSACTION\][\s\S]*?\[\/DELETE_TRANSACTION\]/g, '').trim()}
-                  className="text-sm leading-relaxed"
+                  className="text-xs leading-relaxed"
                 />
               ) : (
-                <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                <div className="text-xs whitespace-pre-wrap leading-relaxed">
                   {msg.content.replace(/\[TRANSACTION\][\s\S]*?\[\/TRANSACTION\]/g, '').replace(/\[DELETE_TRANSACTION\][\s\S]*?\[\/DELETE_TRANSACTION\]/g, '').trim()}
                 </div>
               )}
-              <div className={`text-xs mt-1.5 ${msg.role === 'user' ? 'text-brand-200' : 'text-gray-400'}`}>
+              <div className={`text-[10px] mt-1.5 ${msg.role === 'user' ? 'text-white/50' : 'text-gray-400'}`}>
                 {new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
