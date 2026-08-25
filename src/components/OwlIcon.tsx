@@ -1,18 +1,12 @@
-export function OwlIcon({ className = 'w-5 h-5', color = '#000000' }: { className?: string; color?: string }) {
+/* eslint-disable @next/next/no-img-element */
+
+export function OwlIcon({ className = 'w-5 h-5', invert = false }: { className?: string; invert?: boolean }) {
   return (
-    <div
-      className={`${className}`}
-      style={{
-        backgroundColor: color,
-        WebkitMaskImage: 'url(/owl-logo.png)',
-        WebkitMaskSize: 'contain',
-        WebkitMaskRepeat: 'no-repeat',
-        WebkitMaskPosition: 'center',
-        maskImage: 'url(/owl-logo.png)',
-        maskSize: 'contain',
-        maskRepeat: 'no-repeat',
-        maskPosition: 'center',
-      }}
+    <img
+      src="/owl-logo.png"
+      alt="Finan IA"
+      className={`${className} object-contain ${invert ? 'invert' : ''}`}
+      style={{ mixBlendMode: 'multiply' }}
     />
   )
 }
