@@ -247,7 +247,7 @@ export function Sidebar() {
               <OwlIcon className="w-12 h-12" />
             </div>
             <div>
-              <h1 className={`font-semibold text-base leading-tight ${getTextColor()}`}>Finan IA</h1>
+              <h1 className={`font-semibold text-base leading-tight ${getTextColor()}`}>Lucrécio</h1>
             </div>
           </div>
           <button

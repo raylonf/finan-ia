@@ -50,7 +50,7 @@ export default function LoginPage() {
             <div className="w-12 h-12 flex items-center justify-center">
               <OwlIcon className="w-12 h-12" />
             </div>
-            <span className="font-bold text-gray-800 text-xl">Finan IA</span>
+            <span className="font-bold text-gray-800 text-xl">Lucrécio</span>
           </div>
         </div>
 

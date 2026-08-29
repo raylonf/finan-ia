@@ -6,7 +6,7 @@ import { AppShell } from '@/components/AppShell'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Finan IA - Assistente Financeiro Inteligente',
+  title: 'Lucrécio - Seu Consultor Financeiro',
   description: 'Gerencie suas finanças com inteligência artificial',
 }
 
