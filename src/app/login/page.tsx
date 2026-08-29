@@ -46,11 +46,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2">
-            <div className="w-12 h-12 flex items-center justify-center">
-              <OwlIcon className="w-12 h-12" />
-            </div>
-            <span className="font-bold text-gray-800 text-xl">Lucrécio</span>
+          <div className="inline-flex flex-col items-center gap-2">
+            <img src="/owl-logo.png" alt="Lucrécio" className="w-16 h-16 object-contain" />
+            <span className="font-bold text-gray-800 text-2xl">Lucrécio</span>
           </div>
         </div>
 
